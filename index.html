@@ -1009,69 +1009,42 @@
             text-align: center;
         }
         
-        /* Style untuk Code Preview */
-        .code-preview-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 400px;
-            max-height: 300px;
-            background: #2c3e50;
-            color: #ecf0f1;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: none;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .code-preview-header {
+        /* Style untuk Calendar Filter */
+        .calendar-filter {
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
             align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #34495e;
-            padding-bottom: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
         
-        .code-preview-title {
-            font-weight: bold;
-            color: #3498db;
+        .calendar-filter label {
+            font-weight: 500;
+            color: #2c3e50;
         }
         
-        .code-preview-close {
-            background: none;
-            border: none;
-            color: #ecf0f1;
-            cursor: pointer;
-            font-size: 1.2rem;
+        .calendar-filter select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
         }
         
-        .code-preview-content {
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        .code-preview-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
+        .calendar-filter button {
             background: #3498db;
             color: white;
             border: none;
-            border-radius: 50%;
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            z-index: 999;
-            font-size: 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .calendar-filter button:hover {
+            background: #2980b9;
         }
         
         @media (max-width: 768px) {
@@ -1127,10 +1100,9 @@
                 align-items: flex-start;
             }
             
-            .code-preview-container {
-                width: 90%;
-                right: 5%;
-                left: 5%;
+            .calendar-filter {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -1165,6 +1137,31 @@
         </header>
         
         <div class="calendar-container">
+            <div class="calendar-filter">
+                <label for="yearFilter">Tahun:</label>
+                <select id="yearFilter">
+                    <!-- Year options will be populated dynamically -->
+                </select>
+                
+                <label for="monthFilter">Bulan:</label>
+                <select id="monthFilter">
+                    <option value="0">Januari</option>
+                    <option value="1">Februari</option>
+                    <option value="2">Maret</option>
+                    <option value="3">April</option>
+                    <option value="4">Mei</option>
+                    <option value="5">Juni</option>
+                    <option value="6">Juli</option>
+                    <option value="7">Agustus</option>
+                    <option value="8">September</option>
+                    <option value="9">Oktober</option>
+                    <option value="10">November</option>
+                    <option value="11">Desember</option>
+                </select>
+                
+                <button id="applyFilterBtn">Terapkan</button>
+            </div>
+            
             <div class="calendar-header">
                 <div class="calendar-nav">
                     <button class="nav-btn" id="prevMonth">
@@ -1543,22 +1540,6 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
     
-    <!-- Code Preview Toggle Button -->
-    <button class="code-preview-toggle" id="codePreviewToggle">
-        <i class="fas fa-code"></i>
-    </button>
-    
-    <!-- Code Preview Container -->
-    <div class="code-preview-container" id="codePreviewContainer">
-        <div class="code-preview-header">
-            <div class="code-preview-title">Preview Kode</div>
-            <button class="code-preview-close" id="codePreviewClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="code-preview-content" id="codePreviewContent"></div>
-    </div>
-    
     <script>
         // Global variables
         let currentDate = new Date();
@@ -1748,6 +1729,7 @@
         
         // Initialize calendar
         function initCalendar() {
+            populateYearFilter();
             updateCalendar();
             setupEventListeners();
             loadNote();
@@ -1755,9 +1737,32 @@
             
             // Set initial mode to view mode
             setViewMode();
+        }
+        
+        // Populate year filter dropdown
+        function populateYearFilter() {
+            const yearFilter = document.getElementById('yearFilter');
+            const currentYear = new Date().getFullYear();
             
-            // Initialize code preview
-            initCodePreview();
+            // Clear existing options
+            yearFilter.innerHTML = '';
+            
+            // Add options for 5 years before and after current year
+            for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                
+                // Set current year as selected
+                if (year === currentDate.getFullYear()) {
+                    option.selected = true;
+                }
+                
+                yearFilter.appendChild(option);
+            }
+            
+            // Set month filter to current month
+            document.getElementById('monthFilter').value = currentDate.getMonth();
         }
         
         // Update calendar display
@@ -1769,6 +1774,10 @@
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
                 "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+            
+            // Update year and month filters
+            document.getElementById('yearFilter').value = year;
+            document.getElementById('monthFilter').value = month;
             
             // Clear calendar grid
             const calendarGrid = document.getElementById('calendarGrid');
@@ -3558,6 +3567,16 @@
                 document.getElementById('loginError').textContent = '';
             });
             
+            // Calendar filter
+            document.getElementById('applyFilterBtn').addEventListener('click', () => {
+                const year = parseInt(document.getElementById('yearFilter').value);
+                const month = parseInt(document.getElementById('monthFilter').value);
+                
+                currentDate.setFullYear(year);
+                currentDate.setMonth(month);
+                updateCalendar();
+            });
+            
             // Action buttons
             document.getElementById('saveBtn').addEventListener('click', saveSchedule);
             document.getElementById('shareBtn').addEventListener('click', shareSchedule);
@@ -3829,29 +3848,6 @@
                     showToast('Gagal memuat jadwal yang dibagikan', 'error');
                 }
             }
-        }
-        
-        // Initialize code preview
-        function initCodePreview() {
-            const codePreviewToggle = document.getElementById('codePreviewToggle');
-            const codePreviewContainer = document.getElementById('codePreviewContainer');
-            const codePreviewClose = document.getElementById('codePreviewClose');
-            const codePreviewContent = document.getElementById('codePreviewContent');
-            
-            codePreviewToggle.addEventListener('click', () => {
-                if (codePreviewContainer.style.display === 'flex') {
-                    codePreviewContainer.style.display = 'none';
-                } else {
-                    // Get current HTML code
-                    const htmlCode = document.documentElement.outerHTML;
-                    codePreviewContent.textContent = htmlCode;
-                    codePreviewContainer.style.display = 'flex';
-                }
-            });
-            
-            codePreviewClose.addEventListener('click', () => {
-                codePreviewContainer.style.display = 'none';
-            });
         }
         
         // Initialize app
