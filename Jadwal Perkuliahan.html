@@ -1,0 +1,3611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Jadwal Perkuliahan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .mode-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .mode-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .mode-btn.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+        
+        .semester-selector {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .semester-selector h3 {
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .semester-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .semester-tab {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .semester-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .semester-tab.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+        
+        .calendar-container {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        .month-year {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            background: #e3f2fd;
+        }
+        
+        .calendar-day.selected {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .calendar-day.other-month {
+            color: #bdc3c7;
+        }
+        
+        .calendar-day.has-schedule {
+            position: relative;
+        }
+        
+        .calendar-day.has-schedule::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            width: 5px;
+            height: 5px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+        
+        .calendar-day.today {
+            border: 2px solid #e74c3c;
+        }
+        
+        .schedule-container {
+            padding: 30px;
+        }
+        
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .selected-date {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-icon {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-link {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+        
+        .btn-link:hover {
+            color: #2980b9;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .schedule-table th {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+        
+        .schedule-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .schedule-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .time {
+            font-weight: bold;
+            color: #2c3e50;
+            width: 150px;
+            vertical-align: top;
+        }
+        
+        .time-inputs {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .time-separator {
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        
+        .activity {
+            font-weight: 500;
+        }
+        
+        .activity-type {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+        
+        .class-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .class-select, .group-select {
+            flex: 1;
+        }
+        
+        .duration {
+            color: #7f8c8d;
+            font-style: italic;
+            width: 100px;
+        }
+        
+        .lecture {
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .lecture::before {
+            content: "📚";
+            position: absolute;
+            left: 0;
+        }
+        
+        .break {
+            position: relative;
+            padding-left: 25px;
+            color: #27ae60;
+        }
+        
+        .break::before {
+            content: "☕";
+            position: absolute;
+            left: 0;
+        }
+        
+        .prayer {
+            position: relative;
+            padding-left: 25px;
+            color: #8e44ad;
+        }
+        
+        .prayer::before {
+            content: "🕌";
+            position: absolute;
+            left: 0;
+        }
+        
+        .practicum {
+            position: relative;
+            padding-left: 25px;
+            color: #e67e22;
+        }
+        
+        .practicum::before {
+            content: "🔬";
+            position: absolute;
+            left: 0;
+        }
+        
+        .meeting {
+            position: relative;
+            padding-left: 25px;
+            color: #3498db;
+        }
+        
+        .meeting::before {
+            content: "👥";
+            position: absolute;
+            left: 0;
+        }
+        
+        .edit-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .edit-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .edit-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .course-select-container {
+            margin-top: 8px;
+        }
+        
+        .note {
+            background: #fffde7;
+            border-left: 4px solid #fbc02d;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            position: relative;
+        }
+        
+        .note h3 {
+            color: #f57f17;
+            margin-bottom: 5px;
+        }
+        
+        .note-edit-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #f57f17;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .note-edit-btn:hover {
+            color: #e65100;
+        }
+        
+        .share-modal, .add-option-modal, .edit-note-modal, .time-slots-modal, .course-modal, .lecturer-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .share-link {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .share-link input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .copy-btn {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1001;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        
+        .empty-schedule {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .empty-schedule i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+        
+        .add-schedule-row {
+            background: #e8f5e9;
+        }
+        
+        .add-schedule-row:hover {
+            background: #c8e6c9;
+        }
+        
+        .manage-options {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .manage-options h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .option-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .option-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .option-item button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .no-class {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .time-slots-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .time-slots-table th, .time-slots-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .time-slots-table th {
+            background: #3498db;
+            color: white;
+        }
+        
+        .time-slots-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .time-slot-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        
+        .add-time-slot-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: flex-end;
+        }
+        
+        .add-time-slot-form .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .schedule-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        
+        .schedule-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .parallel-schedules {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .parallel-schedule-item {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .parallel-schedule-item.prayer {
+            border-left-color: #8e44ad;
+        }
+        
+        .parallel-schedule-item.lecture {
+            border-left-color: #3498db;
+        }
+        
+        .parallel-schedule-item.practicum {
+            border-left-color: #e67e22;
+        }
+        
+        .parallel-schedule-item.break {
+            border-left-color: #27ae60;
+        }
+        
+        .parallel-schedule-item.meeting {
+            border-left-color: #3498db;
+        }
+        
+        .parallel-schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .parallel-schedule-time {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .parallel-schedule-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .parallel-schedule-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .parallel-schedule-activity {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .parallel-schedule-class {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .parallel-schedule-group {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .parallel-schedule-lecturer {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .parallel-schedule-duration {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .course-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .course-table th, .course-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .course-table th {
+            background: #3498db;
+            color: white;
+        }
+        
+        .course-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .course-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .lecturer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .lecturer-table th, .lecturer-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .lecturer-table th {
+            background: #3498db;
+            color: white;
+        }
+        
+        .lecturer-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .lecturer-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .lecturer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .lecturer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .lecturer-details {
+            flex: 1;
+        }
+        
+        .lecturer-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .lecturer-nip {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
+        .semester-lecturer-selector {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .semester-lecturer-selector label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .semester-lecturer-selector select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-grid {
+                gap: 2px;
+            }
+            
+            .calendar-day {
+                font-size: 0.9rem;
+            }
+            
+            .schedule-table th, 
+            .schedule-table td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .time {
+                width: 100px;
+            }
+            
+            .mode-controls {
+                position: static;
+                margin-top: 15px;
+                justify-content: center;
+            }
+            
+            .semester-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .add-time-slot-form {
+                flex-direction: column;
+            }
+            
+            .parallel-schedule-content {
+                flex-direction: column;
+            }
+            
+            .lecturer-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .semester-lecturer-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistem Jadwal Perkuliahan</h1>
+            <div class="mode-controls">
+                <button class="mode-btn active" id="editMode">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="mode-btn" id="viewMode">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </div>
+            
+            <div class="semester-selector">
+                <h3>Tahun Ajaran:</h3>
+                <div class="semester-tabs">
+                    <button class="semester-tab active" data-period="gasal">Gasal</button>
+                    <button class="semester-tab" data-period="genap">Genap</button>
+                </div>
+                <h3>Semester:</h3>
+                <div class="semester-tabs" id="semesterTabs">
+                    <button class="semester-tab active" data-semester="1">Semester 1</button>
+                    <button class="semester-tab" data-semester="3">Semester 3</button>
+                    <button class="semester-tab" data-semester="5">Semester 5</button>
+                    <button class="semester-tab" data-semester="7">Semester 7</button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="nav-btn" id="prevMonth">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="month-year" id="monthYear"></div>
+                    <button class="nav-btn" id="nextMonth">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="todayBtn">
+                    <i class="fas fa-calendar-day"></i> Hari Ini
+                </button>
+            </div>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be generated here -->
+            </div>
+        </div>
+        
+        <div class="schedule-container">
+            <div class="schedule-header">
+                <div class="selected-date" id="selectedDate">Pilih tanggal pada kalender</div>
+                <div class="action-buttons" id="actionButtons">
+                    <button class="btn btn-success" id="saveBtn">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <button class="btn btn-primary" id="shareBtn">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button class="btn btn-danger" id="clearBtn">
+                        <i class="fas fa-trash"></i> Hapus Semua
+                    </button>
+                </div>
+            </div>
+            
+            <div class="note" id="noteSection">
+                <button class="note-edit-btn" id="editNoteBtn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <h3>Catatan Penting:</h3>
+                <div id="noteContent">
+                    <p>• Waktu shalat Dhuha: 08:40 - 09:10 | Waktu shalat Dzuhur: 11:40 - 12:40 | Waktu shalat Ashar: 15:10 - 15:30</p>
+                    <p>• Durasi perkuliahan normal: 50 menit | Durasi pendek: 40 menit | Sesi terakhir: 30 menit</p>
+                </div>
+            </div>
+            
+            <div class="manage-options" id="manageOptions">
+                <h3>Kelola Opsi Jadwal</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-sm" id="manageTimeSlotsBtn">
+                        <i class="fas fa-clock"></i> Kelola Waktu
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="manageActivityBtn">
+                        <i class="fas fa-cog"></i> Kelola Kegiatan
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="manageClassBtn">
+                        <i class="fas fa-cog"></i> Kelola Kelas
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="manageGroupBtn">
+                        <i class="fas fa-cog"></i> Kelola Golongan
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="manageLecturerBtn">
+                        <i class="fas fa-user-tie"></i> Kelola Dosen
+                    </button>
+                    <button class="btn btn-success btn-sm" id="createDefaultScheduleBtn">
+                        <i class="fas fa-calendar-plus"></i> Buat Jadwal Default
+                    </button>
+                    <button class="btn btn-warning btn-sm" id="manageCoursesBtn">
+                        <i class="fas fa-book"></i> Kelola Mata Kuliah
+                    </button>
+                </div>
+            </div>
+            
+            <div id="scheduleContent">
+                <div id="scheduleTableContainer">
+                    <!-- Schedule will be generated here -->
+                </div>
+                
+                <div class="empty-schedule hidden" id="emptySchedule">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>Belum Ada Jadwal</h3>
+                    <p>Tambahkan jadwal untuk tanggal ini dengan mengklik tombol "Tambah Jadwal" di bawah</p>
+                </div>
+                
+                <div class="action-buttons" id="addScheduleContainer" style="margin-top: 20px; justify-content: center;">
+                    <button class="btn btn-primary" id="addScheduleBtn">
+                        <i class="fas fa-plus"></i> Tambah Jadwal
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Sistem Informasi Akademik | Setiap tanggal dapat memiliki jadwal tak terbatas</p>
+        </footer>
+    </div>
+    
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bagikan Jadwal</h2>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p>Bagikan link berikut untuk melihat jadwal dalam mode view-only:</p>
+            <div class="share-link">
+                <input type="text" id="shareLink" readonly>
+                <button class="copy-btn" id="copyBtn">
+                    <i class="fas fa-copy"></i> Salin
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Note Modal -->
+    <div class="edit-note-modal" id="editNoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Catatan Penting</h2>
+                <button class="close-modal" id="closeEditNoteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="noteTitle">Judul:</label>
+                <input type="text" id="noteTitle" value="Catatan Penting:">
+            </div>
+            <div class="form-group">
+                <label for="noteText">Isi Catatan:</label>
+                <textarea id="noteText" rows="5"></textarea>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="saveNoteBtn">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+                <button class="btn btn-danger" id="cancelNoteBtn">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Option Modal -->
+    <div class="add-option-modal" id="addOptionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Opsi Baru</h2>
+                <button class="close-modal" id="closeOptionModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="optionName">Nama Opsi:</label>
+                <input type="text" id="optionName" placeholder="Masukkan nama opsi">
+            </div>
+            <div class="form-group" id="relatedClassGroup" style="display: none;">
+                <label for="relatedClass">Kelas Terkait:</label>
+                <select id="relatedClass">
+                    <option value="">-- Pilih Kelas --</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="saveOptionBtn">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+                <button class="btn btn-danger" id="cancelOptionBtn">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
+            
+            <div class="manage-options" style="margin-top: 20px;">
+                <h3 id="existingOptionsTitle">Opsi yang Ada:</h3>
+                <div class="option-list" id="existingOptions">
+                    <!-- Existing options will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Time Slots Modal -->
+    <div class="time-slots-modal" id="timeSlotsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Kelola Waktu Jadwal</h2>
+                <button class="close-modal" id="closeTimeSlotsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="action-buttons" style="margin-bottom: 15px;">
+                <button class="btn btn-success btn-sm" id="setDefaultTimeSlotsBtn">
+                    <i class="fas fa-clock"></i> Atur Waktu Default
+                </button>
+                <button class="btn btn-primary btn-sm" id="applyToAllDatesBtn">
+                    <i class="fas fa-calendar-alt"></i> Terapkan ke Semua Tanggal
+                </button>
+            </div>
+            
+            <table class="time-slots-table">
+                <thead>
+                    <tr>
+                        <th>Waktu Mulai</th>
+                        <th>Waktu Selesai</th>
+                        <th>Durasi</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="timeSlotsBody">
+                    <!-- Time slots will be listed here -->
+                </tbody>
+            </table>
+            
+            <div class="add-time-slot-form">
+                <div class="form-group">
+                    <label for="newTimeStart">Waktu Mulai:</label>
+                    <input type="time" id="newTimeStart">
+                </div>
+                <div class="form-group">
+                    <label for="newTimeEnd">Waktu Selesai:</label>
+                    <input type="time" id="newTimeEnd">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="addTimeSlotBtn">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Modal -->
+    <div class="course-modal" id="courseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Kelola Mata Kuliah</h2>
+                <button class="close-modal" id="closeCourseModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label for="coursePeriod">Tahun Ajaran:</label>
+                <select id="coursePeriod">
+                    <option value="gasal">Gasal</option>
+                    <option value="genap">Genap</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="courseSemester">Semester:</label>
+                <select id="courseSemester">
+                    <option value="1">Semester 1</option>
+                    <option value="3">Semester 3</option>
+                    <option value="5">Semester 5</option>
+                    <option value="7">Semester 7</option>
+                </select>
+            </div>
+            
+            <table class="course-table">
+                <thead>
+                    <tr>
+                        <th>Kode Mata Kuliah</th>
+                        <th>Nama Mata Kuliah</th>
+                        <th>SKS</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="courseTableBody">
+                    <!-- Courses will be listed here -->
+                </tbody>
+            </table>
+            
+            <div class="add-time-slot-form">
+                <div class="form-group">
+                    <label for="courseCode">Kode Mata Kuliah:</label>
+                    <input type="text" id="courseCode" placeholder="Contoh: IF101">
+                </div>
+                <div class="form-group">
+                    <label for="courseName">Nama Mata Kuliah:</label>
+                    <input type="text" id="courseName" placeholder="Contoh: Pemrograman Dasar">
+                </div>
+                <div class="form-group">
+                    <label for="courseCredits">SKS:</label>
+                    <input type="number" id="courseCredits" min="1" max="6" value="3">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="addCourseBtn">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lecturer Modal -->
+    <div class="lecturer-modal" id="lecturerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Kelola Dosen</h2>
+                <button class="close-modal" id="closeLecturerModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="semester-lecturer-selector">
+                <label for="lecturerPeriod">Tahun Ajaran:</label>
+                <select id="lecturerPeriod">
+                    <option value="gasal">Gasal</option>
+                    <option value="genap">Genap</option>
+                </select>
+                
+                <label for="lecturerSemester">Semester:</label>
+                <select id="lecturerSemester">
+                    <option value="1">Semester 1</option>
+                    <option value="3">Semester 3</option>
+                    <option value="5">Semester 5</option>
+                    <option value="7">Semester 7</option>
+                </select>
+            </div>
+            
+            <table class="lecturer-table">
+                <thead>
+                    <tr>
+                        <th>No/NIDN/NUPTK</th>
+                        <th>Nama Dosen</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="lecturerTableBody">
+                    <!-- Lecturers will be listed here -->
+                </tbody>
+            </table>
+            
+            <div class="add-time-slot-form">
+                <div class="form-group">
+                    <label for="lecturerNip">No/NIDN/NUPTK:</label>
+                    <input type="text" id="lecturerNip" placeholder="Contoh: 123456789">
+                </div>
+                <div class="form-group">
+                    <label for="lecturerName">Nama Dosen:</label>
+                    <input type="text" id="lecturerName" placeholder="Contoh: Dr. Ahmad, M.Kom">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="addLecturerBtn">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+    <script>
+        // Global variables
+        let currentDate = new Date();
+        let selectedDate = null;
+        let isEditMode = true;
+        let scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || {};
+        let hasUnsavedChanges = false;
+        let currentOptionType = '';
+        let currentPeriod = 'gasal'; // Default to gasal
+        let currentSemester = '1'; // Default to semester 1
+        
+        // Default note content
+        const defaultNote = {
+            title: "Catatan Penting:",
+            content: "• Waktu shalat Dhuha: 08:40 - 09:10 | Waktu shalat Dzuhur: 11:40 - 12:40 | Waktu shalat Ashar: 15:10 - 15:30\n• Durasi perkuliahan normal: 50 menit | Durasi pendek: 40 menit | Sesi terakhir: 30 menit"
+        };
+        
+        // Load note from localStorage
+        let noteData = JSON.parse(localStorage.getItem('noteData')) || defaultNote;
+        
+        // Prayer times from note
+        const prayerTimes = {
+            dhuha: { start: "08:40", end: "09:10" },
+            dzuhur: { start: "11:40", end: "12:40" },
+            ashar: { start: "15:10", end: "15:30" }
+        };
+        
+        // Default time slots
+        const defaultTimeSlots = [
+            { start: "07:00", end: "07:50" },
+            { start: "07:50", end: "08:40" },
+            { start: "08:40", end: "09:10" },
+            { start: "09:10", end: "10:00" },
+            { start: "10:00", end: "10:50" },
+            { start: "10:50", end: "11:40" },
+            { start: "11:40", end: "12:40" },
+            { start: "12:40", end: "13:30" },
+            { start: "13:30", end: "14:20" },
+            { start: "14:20", end: "15:10" },
+            { start: "15:10", end: "15:30" },
+            { start: "15:30", end: "16:20" },
+            { start: "16:20", end: "17:10" }
+        ];
+        
+        // Load custom time slots from localStorage
+        let timeSlots = JSON.parse(localStorage.getItem('timeSlots')) || [...defaultTimeSlots];
+        
+        // Default courses
+        const defaultCourses = {
+            gasal: {
+                1: [
+                    { code: "IF101", name: "Pemrograman Dasar", credits: 3 },
+                    { code: "MA101", name: "Matematika Dasar", credits: 3 },
+                    { code: "TI101", name: "Teknologi Informasi", credits: 2 }
+                ],
+                3: [
+                    { code: "IF201", name: "Struktur Data", credits: 3 },
+                    { code: "IF202", name: "Basis Data", credits: 3 },
+                    { code: "MA201", name: "Matematika Diskrit", credits: 3 }
+                ],
+                5: [
+                    { code: "IF301", name: "Pemrograman Web", credits: 3 },
+                    { code: "IF302", name: "Sistem Operasi", credits: 3 },
+                    { code: "IF303", name: "Jaringan Komputer", credits: 3 }
+                ],
+                7: [
+                    { code: "IF401", name: "Kecerdasan Buatan", credits: 3 },
+                    { code: "IF402", name: "Pemrograman Mobile", credits: 3 },
+                    { code: "IF403", name: "Keamanan Informasi", credits: 3 }
+                ]
+            },
+            genap: {
+                2: [
+                    { code: "IF102", name: "Algoritma", credits: 3 },
+                    { code: "TI102", name: "Arsitektur Komputer", credits: 3 },
+                    { code: "EN101", name: "Bahasa Inggris", credits: 2 }
+                ],
+                4: [
+                    { code: "IF204", name: "Pemrograman Berorientasi Objek", credits: 3 },
+                    { code: "IF205", name: "Rekayasa Perangkat Lunak", credits: 3 },
+                    { code: "IF206", name: "Sistem Informasi", credits: 3 }
+                ],
+                6: [
+                    { code: "IF304", name: "Data Mining", credits: 3 },
+                    { code: "IF305", name: "Komputer Grafis", credits: 3 },
+                    { code: "IF306", name: "Sistem Terdistribusi", credits: 3 }
+                ],
+                8: [
+                    { code: "IF404", name: "Teknologi Cloud", credits: 3 },
+                    { code: "IF405", name: "Internet of Things", credits: 3 },
+                    { code: "IF406", name: "Etika Profesi", credits: 2 }
+                ]
+            }
+        };
+        
+        // Load custom courses from localStorage
+        let coursesData = JSON.parse(localStorage.getItem('coursesData')) || JSON.parse(JSON.stringify(defaultCourses));
+        
+        // Default lecturers - now organized by period and semester
+        const defaultLecturers = {
+            gasal: {
+                1: [
+                    { nip: "123456789", name: "Dr. Sugeng, M.Kom" },
+                    { nip: "234567890", name: "Dr. Galih, M.Kom" }
+                ],
+                3: [
+                    { nip: "345678901", name: "Prof. Ahmad, M.T" },
+                    { nip: "456789012", name: "Dr. Budi, M.Kom" }
+                ],
+                5: [
+                    { nip: "567890123", name: "Dr. Siti, M.T" },
+                    { nip: "678901234", name: "Dr. Rudi, M.Kom" }
+                ],
+                7: [
+                    { nip: "789012345", name: "Prof. Wati, M.T" },
+                    { nip: "890123456", name: "Dr. Joko, M.Kom" }
+                ]
+            },
+            genap: {
+                2: [
+                    { nip: "901234567", name: "Dr. Ika, M.Kom" },
+                    { nip: "012345678", name: "Dr. Eko, M.T" }
+                ],
+                4: [
+                    { nip: "112233445", name: "Prof. Dian, M.T" },
+                    { nip: "223344556", name: "Dr. Fajar, M.Kom" }
+                ],
+                6: [
+                    { nip: "334455667", name: "Dr. Maya, M.T" },
+                    { nip: "445566778", name: "Dr. Rizki, M.Kom" }
+                ],
+                8: [
+                    { nip: "556677889", name: "Prof. Tono, M.T" },
+                    { nip: "667788990", name: "Dr. Sari, M.Kom" }
+                ]
+            }
+        };
+        
+        // Load custom lecturers from localStorage - now organized by period and semester
+        let lecturersData = JSON.parse(localStorage.getItem('lecturersData')) || JSON.parse(JSON.stringify(defaultLecturers));
+        
+        // Default options
+        const defaultOptions = {
+            activities: [
+                { value: 'lecture', label: 'Perkuliahan' },
+                { value: 'break', label: 'Istirahat' },
+                { value: 'prayer', label: 'Shalat' },
+                { value: 'practicum', label: 'Praktikum' },
+                { value: 'meeting', label: 'Rapat' }
+            ],
+            classes: [
+                { value: 'A', label: 'Kelas A' },
+                { value: 'B', label: 'Kelas B' }
+            ],
+            groups: [
+                { value: 'A1', label: 'A1', class: 'A' },
+                { value: 'A2', label: 'A2', class: 'A' },
+                { value: 'B1', label: 'B1', class: 'B' },
+                { value: 'B2', label: 'B2', class: 'B' }
+            ]
+        };
+        
+        // Load custom options from localStorage
+        let customOptions = JSON.parse(localStorage.getItem('customOptions')) || {
+            activities: [],
+            classes: [],
+            groups: []
+        };
+        
+        // Get all options (default + custom)
+        function getAllOptions(type) {
+            return [...defaultOptions[type], ...customOptions[type]];
+        }
+        
+        // Get schedule data key for current period and semester
+        function getScheduleDataKey() {
+            return `${currentPeriod}_${currentSemester}`;
+        }
+        
+        // Get lecturer data key for current period and semester
+        function getLecturerDataKey() {
+            return `${currentPeriod}_${currentSemester}`;
+        }
+        
+        // Initialize calendar
+        function initCalendar() {
+            updateCalendar();
+            setupEventListeners();
+            loadNote();
+            updateSemesterTabs();
+        }
+        
+        // Update calendar display
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Update month-year display
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+            
+            // Clear calendar grid
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            
+            // Add previous month's trailing days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = daysInPrevMonth - i;
+                calendarGrid.appendChild(day);
+            }
+            
+            // Add current month's days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const scheduleKey = getScheduleDataKey();
+                
+                // Check if this date has schedule
+                if (scheduleData[scheduleKey] && scheduleData[scheduleKey][dateStr] && scheduleData[scheduleKey][dateStr].length > 0) {
+                    dayElement.classList.add('has-schedule');
+                }
+                
+                // Check if this is today
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if this is selected date
+                if (selectedDate === dateStr) {
+                    dayElement.classList.add('selected');
+                }
+                
+                dayElement.addEventListener('click', () => selectDate(dateStr));
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Add next month's leading days
+            const totalCells = calendarGrid.children.length - 7; // Subtract headers
+            const remainingCells = 35 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day other-month';
+                dayElement.textContent = day;
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+        
+        // Select date
+        function selectDate(dateStr) {
+            // Check if there are unsaved changes
+            if (hasUnsavedChanges) {
+                const confirmSave = confirm('Ada perubahan yang belum disimpan. Apakah Anda ingin menyimpannya sebelum berpindah tanggal?');
+                if (confirmSave) {
+                    saveSchedule();
+                }
+            }
+            
+            selectedDate = dateStr;
+            hasUnsavedChanges = false;
+            updateCalendar();
+            updateSelectedDateDisplay();
+            loadScheduleForDate();
+        }
+        
+        // Update selected date display
+        function updateSelectedDateDisplay() {
+            if (selectedDate) {
+                const date = new Date(selectedDate);
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = date.toLocaleDateString('id-ID', options);
+                document.getElementById('selectedDate').textContent = `${formattedDate} - ${currentPeriod.toUpperCase()} Semester ${currentSemester}`;
+            } else {
+                document.getElementById('selectedDate').textContent = 'Pilih tanggal pada kalender';
+            }
+        }
+        
+        // Update semester tabs based on selected period
+        function updateSemesterTabs() {
+            const semesterTabs = document.getElementById('semesterTabs');
+            semesterTabs.innerHTML = '';
+            
+            if (currentPeriod === 'gasal') {
+                [1, 3, 5, 7].forEach(semester => {
+                    const tab = document.createElement('button');
+                    tab.className = 'semester-tab';
+                    tab.textContent = `Semester ${semester}`;
+                    tab.dataset.semester = semester;
+                    if (semester == currentSemester) {
+                        tab.classList.add('active');
+                    }
+                    tab.addEventListener('click', () => selectSemester(semester));
+                    semesterTabs.appendChild(tab);
+                });
+            } else {
+                [2, 4, 6, 8].forEach(semester => {
+                    const tab = document.createElement('button');
+                    tab.className = 'semester-tab';
+                    tab.textContent = `Semester ${semester}`;
+                    tab.dataset.semester = semester;
+                    if (semester == currentSemester) {
+                        tab.classList.add('active');
+                    }
+                    tab.addEventListener('click', () => selectSemester(semester));
+                    semesterTabs.appendChild(tab);
+                });
+            }
+        }
+        
+        // Select period
+        function selectPeriod(period) {
+            // Check if there are unsaved changes
+            if (hasUnsavedChanges) {
+                const confirmSave = confirm('Ada perubahan yang belum disimpan. Apakah Anda ingin menyimpannya sebelum berpindah periode?');
+                if (confirmSave) {
+                    saveSchedule();
+                }
+            }
+            
+            currentPeriod = period;
+            
+            // Reset semester based on period
+            if (period === 'gasal') {
+                currentSemester = '1';
+            } else {
+                currentSemester = '2';
+            }
+            
+            // Update UI
+            document.querySelectorAll('.semester-tab[data-period]').forEach(tab => {
+                if (tab.dataset.period === period) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            updateSemesterTabs();
+            updateCalendar();
+            updateSelectedDateDisplay();
+            loadScheduleForDate();
+        }
+        
+        // Select semester
+        function selectSemester(semester) {
+            // Check if there are unsaved changes
+            if (hasUnsavedChanges) {
+                const confirmSave = confirm('Ada perubahan yang belum disimpan. Apakah Anda ingin menyimpannya sebelum berpindah semester?');
+                if (confirmSave) {
+                    saveSchedule();
+                }
+            }
+            
+            currentSemester = semester;
+            
+            // Update UI
+            document.querySelectorAll('#semesterTabs .semester-tab').forEach(tab => {
+                if (tab.dataset.semester == semester) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            updateCalendar();
+            updateSelectedDateDisplay();
+            loadScheduleForDate();
+        }
+        
+        // Load note
+        function loadNote() {
+            document.querySelector('#noteSection h3').textContent = noteData.title;
+            
+            const noteContent = document.getElementById('noteContent');
+            noteContent.innerHTML = noteData.content.split('\n').map(line => `<p>${line}</p>`).join('');
+            
+            // Update prayer times from note content
+            updatePrayerTimesFromNote();
+        }
+        
+        // Update prayer times from note content
+        function updatePrayerTimesFromNote() {
+            const content = noteData.content;
+            
+            // Extract Dhuha time
+            const dhuhaMatch = content.match(/Waktu shalat Dhuha:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+            if (dhuhaMatch) {
+                prayerTimes.dhuha = { start: dhuhaMatch[1], end: dhuhaMatch[2] };
+            }
+            
+            // Extract Dzuhur time
+            const dzuhurMatch = content.match(/Waktu shalat Dzuhur:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+            if (dzuhurMatch) {
+                prayerTimes.dzuhur = { start: dzuhurMatch[1], end: dzuhurMatch[2] };
+            }
+            
+            // Extract Ashar time
+            const asharMatch = content.match(/Waktu shalat Ashar:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+            if (asharMatch) {
+                prayerTimes.ashar = { start: asharMatch[1], end: asharMatch[2] };
+            }
+        }
+        
+        // Calculate duration between two times
+        function calculateDuration(startTime, endTime) {
+            if (!startTime || !endTime) return '';
+            
+            // Parse times
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            // Calculate total minutes
+            let startTotalMinutes = startHour * 60 + startMinute;
+            let endTotalMinutes = endHour * 60 + endMinute;
+            
+            // Handle cases where end time is earlier than start time (e.g., 23:00 - 01:00)
+            if (endTotalMinutes < startTotalMinutes) {
+                endTotalMinutes += 24 * 60; // Add 24 hours
+            }
+            
+            const durationMinutes = endTotalMinutes - startTotalMinutes;
+            
+            // Convert to hours and minutes
+            const hours = Math.floor(durationMinutes / 60);
+            const minutes = durationMinutes % 60;
+            
+            // Format duration string
+            if (hours > 0 && minutes > 0) {
+                return `${hours} jam ${minutes} menit`;
+            } else if (hours > 0) {
+                return `${hours} jam`;
+            } else {
+                return `${minutes} menit`;
+            }
+        }
+        
+        // Add minutes to time
+        function addMinutesToTime(time, minutes) {
+            const [hours, mins] = time.split(':').map(Number);
+            const totalMinutes = hours * 60 + mins + minutes;
+            const newHours = Math.floor(totalMinutes / 60) % 24;
+            const newMins = totalMinutes % 60;
+            return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
+        }
+        
+        // Check if time is within prayer time
+        function isPrayerTime(time) {
+            for (const prayer in prayerTimes) {
+                const { start, end } = prayerTimes[prayer];
+                if (time >= start && time <= end) {
+                    return prayer;
+                }
+            }
+            return null;
+        }
+        
+        // Group schedules by time slot
+        function groupSchedulesByTime(schedules) {
+            const grouped = {};
+            
+            schedules.forEach(schedule => {
+                if (!schedule.time || !schedule.time.includes(' - ')) return;
+                
+                const [startTime, endTime] = schedule.time.split(' - ');
+                const timeKey = `${startTime}-${endTime}`;
+                
+                if (!grouped[timeKey]) {
+                    grouped[timeKey] = {
+                        startTime,
+                        endTime,
+                        duration: calculateDuration(startTime, endTime),
+                        schedules: []
+                    };
+                }
+                
+                grouped[timeKey].schedules.push(schedule);
+            });
+            
+            // Sort by start time
+            const sortedGroups = [];
+            Object.keys(grouped).sort().forEach(key => {
+                sortedGroups.push(grouped[key]);
+            });
+            
+            return sortedGroups;
+        }
+        
+        // Load schedule for selected date with focus
+        function loadScheduleForDateWithFocus(focusScheduleId) {
+            const scheduleTableContainer = document.getElementById('scheduleTableContainer');
+            const emptySchedule = document.getElementById('emptySchedule');
+            const addScheduleContainer = document.getElementById('addScheduleContainer');
+            const manageOptions = document.getElementById('manageOptions');
+            const editNoteBtn = document.getElementById('editNoteBtn');
+            
+            scheduleTableContainer.innerHTML = '';
+            
+            if (!selectedDate) {
+                emptySchedule.classList.add('hidden');
+                addScheduleContainer.classList.add('hidden');
+                manageOptions.classList.add('hidden');
+                return;
+            }
+            
+            manageOptions.classList.remove('hidden');
+            const scheduleKey = getScheduleDataKey();
+            let schedules = scheduleData[scheduleKey] && scheduleData[scheduleKey][selectedDate] || [];
+            
+            // Show/hide elements based on schedule existence
+            if (schedules.length === 0) {
+                emptySchedule.classList.remove('hidden');
+            } else {
+                emptySchedule.classList.add('hidden');
+                
+                // Group schedules by time slot
+                const groupedSchedules = groupSchedulesByTime(schedules);
+                
+                // Create table structure
+                const table = document.createElement('table');
+                table.className = 'schedule-table';
+                
+                // Create table header
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Kegiatan</th>
+                        <th class="class-header">Kelas</th>
+                        <th class="group-header">Golongan</th>
+                        <th class="lecturer-header">Dosen</th>
+                        <th class="duration-header">Durasi</th>
+                        ${isEditMode ? '<th>Aksi</th>' : ''}
+                    </tr>
+                `;
+                table.appendChild(thead);
+                
+                // Create table body
+                const tbody = document.createElement('tbody');
+                
+                groupedSchedules.forEach((group, groupIndex) => {
+                    group.schedules.forEach((schedule, index) => {
+                        const row = document.createElement('tr');
+                        
+                        if (isEditMode) {
+                            // Edit mode
+                            const isLecture = schedule.type === 'lecture';
+                            const isPracticum = schedule.type === 'practicum';
+                            
+                            // Parse time for edit mode
+                            let startTime = '';
+                            let endTime = '';
+                            if (schedule.time && schedule.time.includes(' - ')) {
+                                [startTime, endTime] = schedule.time.split(' - ');
+                            }
+                            
+                            // For the first schedule in a group, show time inputs
+                            const timeCell = index === 0 ? `
+                                <td class="time" rowspan="${group.schedules.length}">
+                                    <div class="time-inputs">
+                                        <input type="time" class="edit-input time-start" value="${startTime}" data-field="time-start" data-group-index="${groupIndex}" style="width: 70px;" step="60">
+                                        <span class="time-separator">-</span>
+                                        <input type="time" class="edit-input time-end" value="${endTime}" data-field="time-end" data-group-index="${groupIndex}" style="width: 70px;" step="60">
+                                    </div>
+                                </td>
+                            ` : '';
+                            
+                            // MODIFIKASI: Menampilkan dropdown mata kuliah untuk perkuliahan dan praktikum
+                            if (isLecture || isPracticum) {
+                                row.innerHTML = `
+                                    ${timeCell}
+                                    <td>
+                                        <select class="edit-select type-select" data-field="type" data-schedule-id="${schedule.id}">
+                                            ${generateOptions('activities', schedule.type)}
+                                        </select>
+                                        <div class="course-select-container">
+                                            <select class="edit-select course-select" data-field="activity" data-schedule-id="${schedule.id}">
+                                                <option value="">-- Pilih Mata Kuliah --</option>
+                                                ${generateCourseOptions(schedule.activity)}
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td class="class-td">
+                                        <select class="edit-select class-select" data-field="class" data-schedule-id="${schedule.id}">
+                                            ${generateOptions('classes', schedule.class)}
+                                        </select>
+                                    </td>
+                                    <td class="group-td">
+                                        ${isPracticum ? 
+                                            `<select class="edit-select group-select" data-field="group" data-schedule-id="${schedule.id}">
+                                                <option value="">-- Pilih Golongan --</option>
+                                                ${generateGroupOptions(schedule.class, schedule.group)}
+                                            </select>` : 
+                                            '<span class="no-class">-</span>'}
+                                    </td>
+                                    <td class="lecturer-td">
+                                        <select class="edit-select lecturer-select" data-field="lecturer" data-schedule-id="${schedule.id}">
+                                            <option value="">-- Pilih Dosen --</option>
+                                            ${generateLecturerOptions(schedule.lecturer)}
+                                        </select>
+                                    </td>
+                                    <td class="duration-td">
+                                        <input type="text" class="edit-input duration-input" value="${schedule.duration || ''}" data-field="duration" data-schedule-id="${schedule.id}" readonly style="background-color: #f8f9fa; cursor: default;">
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-icon add-item-btn" data-schedule-id="${schedule.id}" data-group-index="${groupIndex}" title="Tambah baris dengan waktu yang sama">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-icon delete-item-btn" data-schedule-id="${schedule.id}" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                `;
+                            } else {
+                                row.innerHTML = `
+                                    ${timeCell}
+                                    <td>
+                                        <select class="edit-select type-select" data-field="type" data-schedule-id="${schedule.id}">
+                                            ${generateOptions('activities', schedule.type)}
+                                        </select>
+                                        <input type="text" class="edit-input" value="${schedule.activity || ''}" data-field="activity" data-schedule-id="${schedule.id}" style="margin-top: 5px;" placeholder="Nama kegiatan">
+                                    </td>
+                                    <td class="class-td">
+                                        <span class="no-class">-</span>
+                                    </td>
+                                    <td class="group-td">
+                                        <span class="no-class">-</span>
+                                    </td>
+                                    <td class="lecturer-td">
+                                        <span class="no-class">-</span>
+                                    </td>
+                                    <td class="duration-td">
+                                        <input type="text" class="edit-input duration-input" value="${schedule.duration || ''}" data-field="duration" data-schedule-id="${schedule.id}" readonly style="background-color: #f8f9fa; cursor: default;">
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-icon add-item-btn" data-schedule-id="${schedule.id}" data-group-index="${groupIndex}" title="Tambah baris dengan waktu yang sama">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-icon delete-item-btn" data-schedule-id="${schedule.id}" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                `;
+                            }
+                        } else {
+                            // View mode
+                            const typeClass = schedule.type || '';
+                            const activityText = schedule.activity || '';
+                            const typeLabel = getOptionLabel('activities', schedule.type) || '';
+                            const classLabel = getOptionLabel('classes', schedule.class) || schedule.class || '-';
+                            const groupLabel = getOptionLabel('groups', schedule.group) || schedule.group || '-';
+                            const lecturerLabel = getLecturerName(schedule.lecturer) || schedule.lecturer || '-';
+                            
+                            // Determine if class/group columns should be shown
+                            const isLecture = schedule.type === 'lecture';
+                            const isPracticum = schedule.type === 'practicum';
+                            
+                            // For the first schedule in a group, show time
+                            const timeCell = index === 0 ? 
+                                `<td class="time" rowspan="${group.schedules.length}">${schedule.time || ''}</td>` : '';
+                            
+                            row.innerHTML = `
+                                ${timeCell}
+                                <td>
+                                    <div class="activity ${typeClass}">
+                                        ${activityText || typeLabel}
+                                        ${activityText && typeLabel ? `<div class="activity-type">${typeLabel}</div>` : ''}
+                                    </div>
+                                </td>
+                                <td class="class-td">${isLecture || isPracticum ? classLabel : '<span class="no-class">-</span>'}</td>
+                                <td class="group-td">${isPracticum ? groupLabel : '<span class="no-class">-</span>'}</td>
+                                <td class="lecturer-td">${isLecture || isPracticum ? lecturerLabel : '<span class="no-class">-</span>'}</td>
+                                <td class="duration-td">${schedule.duration || ''}</td>
+                                <td></td>
+                            `;
+                        }
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+                
+                table.appendChild(tbody);
+                scheduleTableContainer.appendChild(table);
+                
+                // Add event listeners for edit inputs
+                if (isEditMode) {
+                    const inputs = scheduleTableContainer.querySelectorAll('.edit-input');
+                    inputs.forEach(input => {
+                        input.addEventListener('change', updateScheduleData);
+                        
+                        // Special handling for time inputs
+                        if (input.classList.contains('time-start') || input.classList.contains('time-end')) {
+                            input.addEventListener('change', updateTimeSlot);
+                        }
+                    });
+                    
+                    const selects = scheduleTableContainer.querySelectorAll('.edit-select');
+                    selects.forEach(select => {
+                        select.addEventListener('change', updateScheduleData);
+                        
+                        // Special handling for type select
+                        if (select.classList.contains('type-select')) {
+                            select.addEventListener('change', handleTypeChange);
+                        }
+                        
+                        // Special handling for class select
+                        if (select.classList.contains('class-select')) {
+                            select.addEventListener('change', handleClassChange);
+                        }
+                        
+                        // Special handling for course select
+                        if (select.classList.contains('course-select')) {
+                            select.addEventListener('change', updateScheduleData);
+                        }
+                    });
+                    
+                    // Focus on the new item's activity input if focusScheduleId is provided
+                    if (focusScheduleId) {
+                        setTimeout(() => {
+                            const activityInput = scheduleTableContainer.querySelector(`input[data-field="activity"][data-schedule-id="${focusScheduleId}"]`);
+                            if (activityInput) {
+                                activityInput.focus();
+                                activityInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 100);
+                    }
+                }
+            }
+            
+            // Always show add schedule button in edit mode
+            if (isEditMode) {
+                addScheduleContainer.classList.remove('hidden');
+                editNoteBtn.classList.remove('hidden');
+                manageOptions.classList.remove('hidden');
+            } else {
+                addScheduleContainer.classList.add('hidden');
+                editNoteBtn.classList.add('hidden');
+                manageOptions.classList.add('hidden');
+            }
+        }
+        
+        // Load schedule for selected date (wrapper function)
+        function loadScheduleForDate() {
+            loadScheduleForDateWithFocus(null);
+        }
+        
+        // Update time slot for all schedules in a group
+        function updateTimeSlot(event) {
+            const groupIndex = parseInt(event.target.dataset.groupIndex);
+            const field = event.target.dataset.field;
+            
+            if (!selectedDate) return;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey] || !scheduleData[scheduleKey][selectedDate]) return;
+            
+            // Get all schedules for this date
+            const schedules = scheduleData[scheduleKey][selectedDate];
+            
+            // Group schedules by time slot
+            const groupedSchedules = groupSchedulesByTime(schedules);
+            
+            if (groupedSchedules[groupIndex]) {
+                const group = groupedSchedules[groupIndex];
+                
+                if (field === 'time-start') {
+                    group.startTime = event.target.value;
+                } else if (field === 'time-end') {
+                    group.endTime = event.target.value;
+                }
+                
+                // Update all schedules in this group
+                group.schedules.forEach(schedule => {
+                    schedule.time = `${group.startTime} - ${group.endTime}`;
+                    schedule.duration = calculateDuration(group.startTime, group.endTime);
+                });
+                
+                hasUnsavedChanges = true;
+                loadScheduleForDate();
+            }
+        }
+        
+        // Update schedule data when inputs change
+        function updateScheduleData(event) {
+            if (!selectedDate) return;
+            
+            hasUnsavedChanges = true;
+            
+            const field = event.target.dataset.field;
+            const scheduleId = event.target.dataset.scheduleId;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey]) {
+                scheduleData[scheduleKey] = {};
+            }
+            
+            if (!scheduleData[scheduleKey][selectedDate]) {
+                scheduleData[scheduleKey][selectedDate] = [];
+            }
+            
+            // Find the schedule by ID
+            const schedule = scheduleData[scheduleKey][selectedDate].find(s => s.id === scheduleId);
+            if (schedule) {
+                schedule[field] = event.target.value;
+            }
+        }
+        
+        // Handle type change event
+        function handleTypeChange(event) {
+            const scheduleId = event.target.dataset.scheduleId;
+            const type = event.target.value;
+            const row = event.target.closest('tr');
+            const activityCell = row.querySelector('td:nth-child(2)');
+            const classTd = row.querySelector('.class-td');
+            const groupTd = row.querySelector('.group-td');
+            const lecturerTd = row.querySelector('.lecturer-td');
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey] || !scheduleData[scheduleKey][selectedDate]) return;
+            
+            // Find the schedule
+            const schedule = scheduleData[scheduleKey][selectedDate].find(s => s.id === scheduleId);
+            if (!schedule) return;
+            
+            // Check activity type
+            const isLecture = type === 'lecture';
+            const isPracticum = type === 'practicum';
+            const isPrayer = type === 'prayer';
+            
+            // PERBAIKAN: Jika berubah dari Perkuliahan/Praktikum ke jenis lain, kosongkan activity
+            const wasLectureOrPracticum = schedule.type === 'lecture' || schedule.type === 'practicum';
+            
+            // Update activity cell based on type
+            if (isLecture || isPracticum) {
+                // Show course dropdown for lecture and practicum
+                activityCell.innerHTML = `
+                    <select class="edit-select type-select" data-field="type" data-schedule-id="${scheduleId}">
+                        ${generateOptions('activities', type)}
+                    </select>
+                    <div class="course-select-container">
+                        <select class="edit-select course-select" data-field="activity" data-schedule-id="${scheduleId}">
+                            <option value="">-- Pilih Mata Kuliah --</option>
+                            ${generateCourseOptions(schedule.activity)}
+                        </select>
+                    </div>
+                `;
+                
+                // Add event listener to the new type select
+                const newTypeSelect = activityCell.querySelector('.type-select');
+                newTypeSelect.addEventListener('change', handleTypeChange);
+                
+                // Add event listener to the new course select
+                const newCourseSelect = activityCell.querySelector('.course-select');
+                newCourseSelect.addEventListener('change', updateScheduleData);
+            } else {
+                // Show text input for other activity types
+                activityCell.innerHTML = `
+                    <select class="edit-select type-select" data-field="type" data-schedule-id="${scheduleId}">
+                        ${generateOptions('activities', type)}
+                    </select>
+                    <input type="text" class="edit-input" value="${wasLectureOrPracticum ? '' : (schedule.activity || '')}" data-field="activity" data-schedule-id="${scheduleId}" style="margin-top: 5px;" placeholder="Nama kegiatan">
+                `;
+                
+                // Add event listener to the new type select
+                const newTypeSelect = activityCell.querySelector('.type-select');
+                newTypeSelect.addEventListener('change', handleTypeChange);
+                
+                // Add event listener to the new activity input
+                const newActivityInput = activityCell.querySelector('input[data-field="activity"]');
+                newActivityInput.addEventListener('change', updateScheduleData);
+                
+                // PERBAIKAN: Jika berubah dari Perkuliahan/Praktikum ke jenis lain, kosongkan activity di data
+                if (wasLectureOrPracticum) {
+                    schedule.activity = '';
+                }
+            }
+            
+            // Update class column
+            if (isLecture || isPracticum) {
+                classTd.innerHTML = `
+                    <select class="edit-select class-select" data-field="class" data-schedule-id="${scheduleId}">
+                        ${generateOptions('classes', schedule.class)}
+                    </select>
+                `;
+                
+                // Add event listener to the new class select
+                const newClassSelect = classTd.querySelector('.class-select');
+                newClassSelect.addEventListener('change', updateScheduleData);
+                newClassSelect.addEventListener('change', handleClassChange);
+            } else {
+                classTd.innerHTML = '<span class="no-class">-</span>';
+                // Clear class value
+                schedule.class = '';
+            }
+            
+            // Update group column
+            if (isPracticum) {
+                groupTd.innerHTML = `
+                    <select class="edit-select group-select" data-field="group" data-schedule-id="${scheduleId}">
+                        <option value="">-- Pilih Golongan --</option>
+                        ${generateGroupOptions(schedule.class, schedule.group)}
+                    </select>
+                `;
+                
+                // Add event listener to the new group select
+                const newGroupSelect = groupTd.querySelector('.group-select');
+                newGroupSelect.addEventListener('change', updateScheduleData);
+            } else {
+                groupTd.innerHTML = '<span class="no-class">-</span>';
+                // Clear group value
+                schedule.group = '';
+            }
+            
+            // Update lecturer column
+            if (isLecture || isPracticum) {
+                lecturerTd.innerHTML = `
+                    <select class="edit-select lecturer-select" data-field="lecturer" data-schedule-id="${scheduleId}">
+                        <option value="">-- Pilih Dosen --</option>
+                        ${generateLecturerOptions(schedule.lecturer)}
+                    </select>
+                `;
+                
+                // Add event listener to the new lecturer select
+                const newLecturerSelect = lecturerTd.querySelector('.lecturer-select');
+                newLecturerSelect.addEventListener('change', updateScheduleData);
+            } else {
+                lecturerTd.innerHTML = '<span class="no-class">-</span>';
+                // Clear lecturer value
+                schedule.lecturer = '';
+            }
+            
+            // Special handling for prayer type
+            if (isPrayer && schedule.time) {
+                // Check if current start time matches any prayer time
+                const [startTime] = schedule.time.split(' - ');
+                const prayerType = isPrayerTime(startTime);
+                if (prayerType) {
+                    // Set end time to match the prayer end time
+                    const [, endTime] = schedule.time.split(' - ');
+                    const newEndTime = prayerTimes[prayerType].end;
+                    
+                    // Update the time slot
+                    const groupIndex = event.target.closest('tr').querySelector('.time-start').dataset.groupIndex;
+                    updateTimeSlot({
+                        target: {
+                            value: newEndTime,
+                            dataset: { field: 'time-end', groupIndex: groupIndex }
+                        }
+                    });
+                }
+            }
+            
+            hasUnsavedChanges = true;
+        }
+        
+        // Handle class change event
+        function handleClassChange(event) {
+            const scheduleId = event.target.dataset.scheduleId;
+            const row = event.target.closest('tr');
+            updateGroupOptions(row, scheduleId);
+            hasUnsavedChanges = true;
+        }
+        
+        // Update group options based on selected class
+        function updateGroupOptions(row, scheduleId) {
+            const classSelect = row.querySelector('.class-select');
+            const groupSelect = row.querySelector('.group-select');
+            const selectedClass = classSelect.value;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey] || !scheduleData[scheduleKey][selectedDate]) return;
+            
+            // Find the schedule
+            const schedule = scheduleData[scheduleKey][selectedDate].find(s => s.id === scheduleId);
+            if (!schedule) return;
+            
+            const selectedGroup = schedule.group || '';
+            
+            // Update options
+            groupSelect.innerHTML = '<option value="">-- Pilih Golongan --</option>' + 
+                generateGroupOptions(selectedClass, selectedGroup);
+        }
+        
+        // Delete schedule item
+        function deleteScheduleItem(scheduleId) {
+            if (!selectedDate) return;
+            
+            if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+                const scheduleKey = getScheduleDataKey();
+                if (scheduleData[scheduleKey] && scheduleData[scheduleKey][selectedDate]) {
+                    scheduleData[scheduleKey][selectedDate] = scheduleData[scheduleKey][selectedDate].filter(s => s.id !== scheduleId);
+                    hasUnsavedChanges = true;
+                    loadScheduleForDate();
+                }
+            }
+        }
+        
+        // Add new schedule item with same time
+        function addScheduleItemWithSameTime(scheduleId, groupIndex) {
+            if (!selectedDate) return;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey] || !scheduleData[scheduleKey][selectedDate]) return;
+            
+            // Find the schedule by ID
+            const originalSchedule = scheduleData[scheduleKey][selectedDate].find(s => s.id === scheduleId);
+            if (!originalSchedule) return;
+            
+            // Generate unique ID for the new schedule
+            const newScheduleId = Date.now().toString();
+            
+            // Create new schedule with the same time but empty other fields
+            const newSchedule = {
+                id: newScheduleId,
+                time: originalSchedule.time,
+                activity: "",
+                type: "",
+                class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
+                group: "",
+                lecturer: "",
+                duration: originalSchedule.duration
+            };
+            
+            // Add to schedule data
+            scheduleData[scheduleKey][selectedDate].push(newSchedule);
+            hasUnsavedChanges = true;
+            
+            // Reload schedule and focus on the new item's activity input
+            loadScheduleForDateWithFocus(newScheduleId);
+        }
+        
+        // Save schedule
+        function saveSchedule() {
+            if (!selectedDate) {
+                showToast('Silakan pilih tanggal terlebih dahulu', 'error');
+                return;
+            }
+            
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+            hasUnsavedChanges = false;
+            updateCalendar();
+            loadScheduleForDate();
+            
+            showToast('Jadwal berhasil disimpan!', 'success');
+        }
+        
+        // Clear schedule for selected date
+        function clearSchedule() {
+            if (!selectedDate) {
+                showToast('Silakan pilih tanggal terlebih dahulu', 'error');
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin menghapus semua jadwal untuk tanggal ini?')) {
+                const scheduleKey = getScheduleDataKey();
+                if (scheduleData[scheduleKey]) {
+                    delete scheduleData[scheduleKey][selectedDate];
+                    localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+                    hasUnsavedChanges = false;
+                    updateCalendar();
+                    loadScheduleForDate();
+                    
+                    showToast('Semua jadwal berhasil dihapus!', 'success');
+                }
+            }
+        }
+        
+        // Add new schedule item
+        function addScheduleItem() {
+            if (!selectedDate) return;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey]) {
+                scheduleData[scheduleKey] = {};
+            }
+            
+            if (!scheduleData[scheduleKey][selectedDate]) {
+                scheduleData[scheduleKey][selectedDate] = [];
+            }
+            
+            // Get the next available time slot
+            let startTime = "07:00";
+            
+            // Check if there are existing schedules
+            if (scheduleData[scheduleKey][selectedDate].length > 0) {
+                // Group schedules by time slot
+                const groupedSchedules = groupSchedulesByTime(scheduleData[scheduleKey][selectedDate]);
+                
+                // Get the last group's end time
+                const lastGroup = groupedSchedules[groupedSchedules.length - 1];
+                if (lastGroup) {
+                    startTime = lastGroup.endTime;
+                }
+            }
+            
+            // Check if this time is within a prayer time
+            const prayerType = isPrayerTime(startTime);
+            let endTime = '';
+            let duration = '';
+            let type = '';
+            
+            if (prayerType) {
+                // If it's a prayer time, use prayer settings
+                endTime = prayerTimes[prayerType].end;
+                duration = calculateDuration(startTime, endTime);
+                type = 'prayer';
+            } else {
+                // Otherwise, use standard 50-minute duration from the start time
+                endTime = addMinutesToTime(startTime, 50);
+                duration = '50 menit';
+                // Set empty type to show "Pilih Kegiatan" option
+                type = '';
+            }
+            
+            // Generate unique ID for the schedule
+            const scheduleId = Date.now().toString();
+            
+            const newItem = {
+                id: scheduleId,
+                time: `${startTime} - ${endTime}`,
+                activity: "",
+                type: type,
+                class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
+                group: "",
+                lecturer: "",
+                duration: duration
+            };
+            
+            scheduleData[scheduleKey][selectedDate].push(newItem);
+            hasUnsavedChanges = true;
+            loadScheduleForDateWithFocus(scheduleId);
+        }
+        
+        // Create default schedule for selected date
+        function createDefaultSchedule() {
+            if (!selectedDate) return;
+            
+            const scheduleKey = getScheduleDataKey();
+            if (!scheduleData[scheduleKey]) {
+                scheduleData[scheduleKey] = {};
+            }
+            
+            if (scheduleData[scheduleKey][selectedDate] && scheduleData[scheduleKey][selectedDate].length > 0) {
+                if (!confirm('Tanggal ini sudah memiliki jadwal. Apakah Anda ingin menimpanya dengan jadwal default?')) {
+                    return;
+                }
+            }
+            
+            scheduleData[scheduleKey][selectedDate] = [];
+            
+            // Dapatkan waktu shalat dari catatan penting
+            updatePrayerTimesFromNote();
+            
+            // Buat jadwal default berdasarkan time slots
+            timeSlots.forEach(slot => {
+                const startTime = slot.start;
+                const endTime = slot.end;
+                const duration = calculateDuration(startTime, endTime);
+                
+                // Periksa apakah time slot ini adalah waktu shalat
+                let isPrayerTime = false;
+                let prayerName = '';
+                let type = '';
+                
+                // Cek untuk setiap waktu shalat
+                for (const [prayer, times] of Object.entries(prayerTimes)) {
+                    if (startTime === times.start && endTime === times.end) {
+                        isPrayerTime = true;
+                        prayerName = prayer;
+                        type = 'prayer';
+                        break;
+                    }
+                }
+                
+                // Generate unique ID untuk jadwal
+                const scheduleId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                
+                // Buat item jadwal baru
+                const newItem = {
+                    id: scheduleId,
+                    time: `${startTime} - ${endTime}`,
+                    activity: isPrayerTime ? `Shalat ${prayerName.charAt(0).toUpperCase() + prayerName.slice(1)}` : "",
+                    type: type,
+                    class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
+                    group: "",
+                    lecturer: "",
+                    duration: duration
+                };
+                
+                scheduleData[scheduleKey][selectedDate].push(newItem);
+            });
+            
+            hasUnsavedChanges = true;
+            loadScheduleForDate();
+            
+            showToast('Jadwal default berhasil dibuat! Waktu shalat sudah diisi otomatis.', 'success');
+        }
+        
+        // Edit note
+        function editNote() {
+            document.getElementById('noteTitle').value = noteData.title;
+            document.getElementById('noteText').value = noteData.content;
+            document.getElementById('editNoteModal').style.display = 'flex';
+        }
+        
+        // Save note
+        function saveNote() {
+            noteData.title = document.getElementById('noteTitle').value;
+            noteData.content = document.getElementById('noteText').value;
+            
+            localStorage.setItem('noteData', JSON.stringify(noteData));
+            
+            // Update prayer times from the saved note
+            updatePrayerTimesFromNote();
+            
+            document.getElementById('editNoteModal').style.display = 'none';
+            
+            loadNote();
+            
+            showToast('Catatan berhasil disimpan! Waktu shalat telah diperbarui.', 'success');
+        }
+        
+        // Open add option modal
+        function openAddOptionModal(type, relatedClass = '') {
+            currentOptionType = type;
+            const modal = document.getElementById('addOptionModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const relatedClassGroup = document.getElementById('relatedClassGroup');
+            const relatedClassSelect = document.getElementById('relatedClass');
+            const existingOptionsTitle = document.getElementById('existingOptionsTitle');
+            const existingOptions = document.getElementById('existingOptions');
+            
+            // Set modal title
+            const titles = {
+                activities: 'Tambah Kegiatan Baru',
+                classes: 'Tambah Kelas Baru',
+                groups: 'Tambah Golongan Baru'
+            };
+            modalTitle.textContent = titles[type];
+            
+            // Show/hide related class field for groups
+            if (type === 'groups') {
+                relatedClassGroup.style.display = 'block';
+                
+                // Populate class options
+                relatedClassSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>' + 
+                    generateOptions('classes', relatedClass);
+                
+                if (relatedClass) {
+                    relatedClassSelect.value = relatedClass;
+                }
+            } else {
+                relatedClassGroup.style.display = 'none';
+            }
+            
+            // Set existing options title
+            const existingTitles = {
+                activities: 'Kegiatan yang Ada:',
+                classes: 'Kelas yang Ada:',
+                groups: 'Golongan yang Ada:'
+            };
+            existingOptionsTitle.textContent = existingTitles[type];
+            
+            // Populate existing options
+            existingOptions.innerHTML = '';
+            const options = getAllOptions(type);
+            options.forEach(option => {
+                // Skip prayer activity in the list
+                if (type === 'activities' && option.value === 'prayer') {
+                    return;
+                }
+                
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                
+                let optionText = option.label;
+                if (type === 'groups' && option.class) {
+                    const classLabel = getOptionLabel('classes', option.class);
+                    optionText += ` (${classLabel})`;
+                }
+                
+                // MODIFIKASI: Semua opsi bisa dihapus, termasuk default
+                optionItem.innerHTML = `
+                    <span>${optionText}</span>
+                    <button onclick="removeOption('${type}', '${option.value}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                existingOptions.appendChild(optionItem);
+            });
+            
+            // Clear input
+            document.getElementById('optionName').value = '';
+            
+            // Show modal
+            modal.style.display = 'flex';
+        }
+        
+        // Remove custom option
+        function removeOption(type, value) {
+            if (!confirm('Apakah Anda yakin ingin menghapus opsi ini?')) return;
+            
+            // Check if it's a default option
+            const defaultOption = defaultOptions[type].find(option => option.value === value);
+            
+            if (defaultOption) {
+                // For default options, we need to move them to custom options first
+                // so they can be deleted
+                const optionIndex = defaultOptions[type].findIndex(option => option.value === value);
+                if (optionIndex !== -1) {
+                    // Move to custom options
+                    const optionToMove = defaultOptions[type].splice(optionIndex, 1)[0];
+                    customOptions[type].push(optionToMove);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('customOptions', JSON.stringify(customOptions));
+                    localStorage.setItem('defaultOptions', JSON.stringify(defaultOptions));
+                }
+            }
+            
+            // Remove from custom options
+            customOptions[type] = customOptions[type].filter(option => option.value !== value);
+            
+            // Save to localStorage
+            localStorage.setItem('customOptions', JSON.stringify(customOptions));
+            
+            // Refresh modal
+            openAddOptionModal(type);
+            
+            // Refresh schedule
+            loadScheduleForDate();
+            
+            showToast('Opsi berhasil dihapus!', 'success');
+        }
+        
+        // Save new option
+        function saveOption() {
+            const optionName = document.getElementById('optionName').value.trim();
+            
+            if (!optionName) {
+                showToast('Nama opsi tidak boleh kosong!', 'error');
+                return;
+            }
+            
+            // Generate value from name
+            const value = optionName.toLowerCase().replace(/\s+/g, '_');
+            
+            // Check if option already exists
+            const allOptions = getAllOptions(currentOptionType);
+            if (allOptions.some(option => option.value === value || option.label === optionName)) {
+                showToast('Opsi sudah ada!', 'error');
+                return;
+            }
+            
+            // Check if trying to add prayer activity
+            if (currentOptionType === 'activities' && value === 'prayer') {
+                showToast('Kegiatan shalat tidak dapat ditambahkan atau diubah secara manual!', 'error');
+                return;
+            }
+            
+            // Create new option
+            const newOption = {
+                value: value,
+                label: optionName
+            };
+            
+            // Add related class for groups
+            if (currentOptionType === 'groups') {
+                const relatedClass = document.getElementById('relatedClass').value;
+                if (relatedClass) {
+                    newOption.class = relatedClass;
+                }
+            }
+            
+            // Add to custom options
+            customOptions[currentOptionType].push(newOption);
+            
+            // Save to localStorage
+            localStorage.setItem('customOptions', JSON.stringify(customOptions));
+            
+            // Close modal
+            document.getElementById('addOptionModal').style.display = 'none';
+            
+            // Refresh schedule
+            loadScheduleForDate();
+            
+            showToast('Opsi berhasil ditambahkan!', 'success');
+        }
+        
+        // Share schedule
+        function shareSchedule() {
+            if (!selectedDate) {
+                showToast('Silakan pilih tanggal terlebih dahulu', 'error');
+                return;
+            }
+            
+            const scheduleKey = getScheduleDataKey();
+            
+            // Create shareable URL
+            const shareData = {
+                date: selectedDate,
+                period: currentPeriod,
+                semester: currentSemester,
+                schedule: scheduleData[scheduleKey] && scheduleData[scheduleKey][selectedDate] || [],
+                note: noteData
+            };
+            
+            const encodedData = btoa(JSON.stringify(shareData));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?view=${encodedData}`;
+            
+            document.getElementById('shareLink').value = shareUrl;
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+        
+        // Copy share link
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            
+            showToast('Link berhasil disalin!', 'success');
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show';
+            
+            if (type === 'error') {
+                toast.style.background = '#e74c3c';
+            } else if (type === 'success') {
+                toast.style.background = '#27ae60';
+            } else {
+                toast.style.background = '#2c3e50';
+            }
+            
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+        
+        // Load time slots into the modal
+        function loadTimeSlots() {
+            const timeSlotsBody = document.getElementById('timeSlotsBody');
+            timeSlotsBody.innerHTML = '';
+            
+            timeSlots.forEach((slot, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${slot.start}</td>
+                    <td>${slot.end}</td>
+                    <td>${calculateDuration(slot.start, slot.end)}</td>
+                    <td class="time-slot-actions">
+                        <button class="btn btn-danger btn-xs" onclick="removeTimeSlot(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                timeSlotsBody.appendChild(row);
+            });
+        }
+        
+        // Open time slots modal
+        function openTimeSlotsModal() {
+            document.getElementById('timeSlotsModal').style.display = 'flex';
+            loadTimeSlots();
+        }
+        
+        // Add new time slot
+        function addTimeSlot() {
+            const startTime = document.getElementById('newTimeStart').value;
+            const endTime = document.getElementById('newTimeEnd').value;
+            
+            if (!startTime || !endTime) {
+                showToast('Waktu mulai dan selesai harus diisi!', 'error');
+                return;
+            }
+            
+            if (startTime >= endTime) {
+                showToast('Waktu selesai harus lebih lambat dari waktu mulai!', 'error');
+                return;
+            }
+            
+            // Check if this time slot overlaps with existing ones
+            const overlaps = timeSlots.some(slot => {
+                return (startTime >= slot.start && startTime < slot.end) || 
+                       (endTime > slot.start && endTime <= slot.end) ||
+                       (startTime <= slot.start && endTime >= slot.end);
+            });
+            
+            if (overlaps) {
+                showToast('Waktu ini bertumpuk dengan waktu yang sudah ada!', 'error');
+                return;
+            }
+            
+            // Add new time slot
+            timeSlots.push({ start: startTime, end: endTime });
+            
+            // Sort time slots by start time
+            timeSlots.sort((a, b) => a.start.localeCompare(b.start));
+            
+            // Save to localStorage
+            localStorage.setItem('timeSlots', JSON.stringify(timeSlots));
+            
+            // Clear inputs
+            document.getElementById('newTimeStart').value = '';
+            document.getElementById('newTimeEnd').value = '';
+            
+            // Reload time slots
+            loadTimeSlots();
+            
+            showToast('Waktu berhasil ditambahkan!', 'success');
+        }
+        
+        // Remove time slot
+        function removeTimeSlot(index) {
+            if (!confirm('Apakah Anda yakin ingin menghapus waktu ini?')) return;
+            
+            timeSlots.splice(index, 1);
+            
+            // Save to localStorage
+            localStorage.setItem('timeSlots', JSON.stringify(timeSlots));
+            
+            // Reload time slots
+            loadTimeSlots();
+            
+            showToast('Waktu berhasil dihapus!', 'success');
+        }
+        
+        // Set default time slots
+        function setDefaultTimeSlots() {
+            if (!confirm('Apakah Anda yakin ingin mengatur waktu ke default?')) return;
+            
+            timeSlots = [...defaultTimeSlots];
+            
+            // Save to localStorage
+            localStorage.setItem('timeSlots', JSON.stringify(timeSlots));
+            
+            // Reload time slots
+            loadTimeSlots();
+            
+            showToast('Waktu default berhasil diatur!', 'success');
+        }
+        
+        // Apply time slots to all dates
+        function applyTimeSlotsToAllDates() {
+            if (!confirm('Apakah Anda yakin ingin menerapkan jadwal waktu ini ke semua tanggal? Ini akan menimpa jadwal yang sudah ada.')) return;
+            
+            // Get all schedule keys
+            const scheduleKeys = Object.keys(scheduleData);
+            
+            scheduleKeys.forEach(key => {
+                const dates = Object.keys(scheduleData[key]);
+                
+                dates.forEach(date => {
+                    scheduleData[key][date] = [];
+                    
+                    // Create schedule items based on time slots
+                    timeSlots.forEach(slot => {
+                        const startTime = slot.start;
+                        const endTime = slot.end;
+                        const duration = calculateDuration(startTime, endTime);
+                        
+                        // Check if this time slot is a prayer time
+                        const prayerType = isPrayerTime(startTime);
+                        let type = '';
+                        
+                        if (prayerType) {
+                            type = 'prayer';
+                        }
+                        
+                        // Generate unique ID for the schedule
+                        const scheduleId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                        
+                        const newItem = {
+                            id: scheduleId,
+                            time: `${startTime} - ${endTime}`,
+                            activity: "",
+                            type: type,
+                            class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
+                            group: "",
+                            lecturer: "",
+                            duration: duration
+                        };
+                        
+                        scheduleData[key][date].push(newItem);
+                    });
+                });
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+            
+            // Reload schedule for selected date
+            loadScheduleForDate();
+            
+            showToast('Jadwal waktu berhasil diterapkan ke semua tanggal!', 'success');
+        }
+        
+        // Open course modal
+        function openCourseModal() {
+            document.getElementById('courseModal').style.display = 'flex';
+            document.getElementById('coursePeriod').value = currentPeriod;
+            document.getElementById('courseSemester').value = currentSemester;
+            loadCourses();
+        }
+        
+        // Load courses into the modal
+        function loadCourses() {
+            const period = document.getElementById('coursePeriod').value;
+            const semester = document.getElementById('courseSemester').value;
+            const courseTableBody = document.getElementById('courseTableBody');
+            
+            courseTableBody.innerHTML = '';
+            
+            if (!coursesData[period] || !coursesData[period][semester]) {
+                return;
+            }
+            
+            coursesData[period][semester].forEach((course, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${course.code}</td>
+                    <td>${course.name}</td>
+                    <td>${course.credits}</td>
+                    <td class="course-actions">
+                        <button class="btn btn-danger btn-xs" onclick="removeCourse('${period}', '${semester}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                courseTableBody.appendChild(row);
+            });
+        }
+        
+        // Add new course
+        function addCourse() {
+            const period = document.getElementById('coursePeriod').value;
+            const semester = document.getElementById('courseSemester').value;
+            const code = document.getElementById('courseCode').value.trim();
+            const name = document.getElementById('courseName').value.trim();
+            const credits = parseInt(document.getElementById('courseCredits').value);
+            
+            if (!code || !name || isNaN(credits) || credits < 1 || credits > 6) {
+                showToast('Data mata kuliah tidak valid!', 'error');
+                return;
+            }
+            
+            // Check if course code already exists
+            if (coursesData[period] && coursesData[period][semester]) {
+                const exists = coursesData[period][semester].some(course => course.code === code);
+                if (exists) {
+                    showToast('Kode mata kuliah sudah ada!', 'error');
+                    return;
+                }
+            }
+            
+            // Initialize data structure if needed
+            if (!coursesData[period]) {
+                coursesData[period] = {};
+            }
+            
+            if (!coursesData[period][semester]) {
+                coursesData[period][semester] = [];
+            }
+            
+            // Add new course
+            coursesData[period][semester].push({
+                code,
+                name,
+                credits
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('coursesData', JSON.stringify(coursesData));
+            
+            // Clear inputs
+            document.getElementById('courseCode').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseCredits').value = '3';
+            
+            // Reload courses
+            loadCourses();
+            
+            showToast('Mata kuliah berhasil ditambahkan!', 'success');
+        }
+        
+        // Remove course
+        function removeCourse(period, semester, index) {
+            if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) return;
+            
+            coursesData[period][semester].splice(index, 1);
+            
+            // Save to localStorage
+            localStorage.setItem('coursesData', JSON.stringify(coursesData));
+            
+            // Reload courses
+            loadCourses();
+            
+            showToast('Mata kuliah berhasil dihapus!', 'success');
+        }
+        
+        // Open lecturer modal
+        function openLecturerModal() {
+            document.getElementById('lecturerModal').style.display = 'flex';
+            document.getElementById('lecturerPeriod').value = currentPeriod;
+            document.getElementById('lecturerSemester').value = currentSemester;
+            loadLecturers();
+        }
+        
+        // Load lecturers into the modal based on selected period and semester
+        function loadLecturers() {
+            const period = document.getElementById('lecturerPeriod').value;
+            const semester = document.getElementById('lecturerSemester').value;
+            const lecturerTableBody = document.getElementById('lecturerTableBody');
+            
+            lecturerTableBody.innerHTML = '';
+            
+            // Initialize data structure if needed
+            if (!lecturersData[period]) {
+                lecturersData[period] = {};
+            }
+            
+            if (!lecturersData[period][semester]) {
+                lecturersData[period][semester] = [];
+            }
+            
+            lecturersData[period][semester].forEach((lecturer, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${lecturer.nip}</td>
+                    <td>${lecturer.name}</td>
+                    <td class="lecturer-actions">
+                        <button class="btn btn-danger btn-xs" onclick="removeLecturer('${period}', '${semester}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                lecturerTableBody.appendChild(row);
+            });
+        }
+        
+        // Add new lecturer
+        function addLecturer() {
+            const period = document.getElementById('lecturerPeriod').value;
+            const semester = document.getElementById('lecturerSemester').value;
+            const nip = document.getElementById('lecturerNip').value.trim();
+            const name = document.getElementById('lecturerName').value.trim();
+            
+            if (!nip || !name) {
+                showToast('Data dosen tidak valid!', 'error');
+                return;
+            }
+            
+            // Initialize data structure if needed
+            if (!lecturersData[period]) {
+                lecturersData[period] = {};
+            }
+            
+            if (!lecturersData[period][semester]) {
+                lecturersData[period][semester] = [];
+            }
+            
+            // Check if lecturer NIP already exists in this semester
+            const exists = lecturersData[period][semester].some(lecturer => lecturer.nip === nip);
+            if (exists) {
+                showToast('No/NIDN/NUPTK dosen sudah ada di semester ini!', 'error');
+                return;
+            }
+            
+            // Add new lecturer
+            lecturersData[period][semester].push({
+                nip,
+                name
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('lecturersData', JSON.stringify(lecturersData));
+            
+            // Clear inputs
+            document.getElementById('lecturerNip').value = '';
+            document.getElementById('lecturerName').value = '';
+            
+            // Reload lecturers
+            loadLecturers();
+            
+            // Reload schedule to update lecturer options
+            loadScheduleForDate();
+            
+            showToast('Dosen berhasil ditambahkan!', 'success');
+        }
+        
+        // Remove lecturer
+        function removeLecturer(period, semester, index) {
+            if (!confirm('Apakah Anda yakin ingin menghapus dosen ini?')) return;
+            
+            lecturersData[period][semester].splice(index, 1);
+            
+            // Save to localStorage
+            localStorage.setItem('lecturersData', JSON.stringify(lecturersData));
+            
+            // Reload lecturers
+            loadLecturers();
+            
+            // Reload schedule to update lecturer options
+            loadScheduleForDate();
+            
+            showToast('Dosen berhasil dihapus!', 'success');
+        }
+        
+        // Get lecturer name by NIP for current period and semester
+        function getLecturerName(nip) {
+            if (!nip) return '';
+            
+            // Initialize data structure if needed
+            if (!lecturersData[currentPeriod]) {
+                lecturersData[currentPeriod] = {};
+            }
+            
+            if (!lecturersData[currentPeriod][currentSemester]) {
+                lecturersData[currentPeriod][currentSemester] = [];
+            }
+            
+            const lecturer = lecturersData[currentPeriod][currentSemester].find(l => l.nip === nip);
+            return lecturer ? lecturer.name : '';
+        }
+        
+        // Generate lecturer options HTML for current period and semester
+        function generateLecturerOptions(selectedValue) {
+            // Initialize data structure if needed
+            if (!lecturersData[currentPeriod]) {
+                lecturersData[currentPeriod] = {};
+            }
+            
+            if (!lecturersData[currentPeriod][currentSemester]) {
+                lecturersData[currentPeriod][currentSemester] = [];
+            }
+            
+            return lecturersData[currentPeriod][currentSemester].map(lecturer => 
+                `<option value="${lecturer.nip}" ${lecturer.nip === selectedValue ? 'selected' : ''}>${lecturer.name}</option>`
+            ).join('');
+        }
+        
+        // Generate course options HTML based on current period and semester
+        function generateCourseOptions(selectedValue) {
+            // Initialize data structure if needed
+            if (!coursesData[currentPeriod]) {
+                coursesData[currentPeriod] = {};
+            }
+            
+            if (!coursesData[currentPeriod][currentSemester]) {
+                coursesData[currentPeriod][currentSemester] = [];
+            }
+            
+            return coursesData[currentPeriod][currentSemester].map(course => 
+                `<option value="${course.name}" ${course.name === selectedValue ? 'selected' : ''}>${course.code} - ${course.name}</option>`
+            ).join('');
+        }
+        
+        // Generate options HTML for select
+        function generateOptions(type, selectedValue) {
+            // For activities, add "Pilih Kegiatan" option at the beginning
+            if (type === 'activities') {
+                let options = '<option value="">-- Pilih Kegiatan --</option>';
+                
+                const allOptions = getAllOptions(type);
+                allOptions.forEach(option => {
+                    options += `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`;
+                });
+                
+                return options;
+            }
+            
+            // For classes, add "Pilih Kelas" option at the beginning
+            if (type === 'classes') {
+                let options = '<option value="">-- Pilih Kelas --</option>';
+                
+                const allOptions = getAllOptions(type);
+                allOptions.forEach(option => {
+                    options += `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`;
+                });
+                
+                return options;
+            }
+            
+            // For other types, use the original logic
+            const options = getAllOptions(type);
+            return options.map(option => 
+                `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`
+            ).join('');
+        }
+        
+        // Generate group options HTML based on selected class
+        function generateGroupOptions(selectedClass, selectedValue) {
+            const groups = getAllOptions('groups');
+            return groups
+                .filter(group => !selectedClass || group.class === selectedClass || !group.class)
+                .map(option => 
+                    `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`
+                ).join('');
+        }
+        
+        // Get option label by value
+        function getOptionLabel(type, value) {
+            if (!value) return '';
+            const options = getAllOptions(type);
+            const option = options.find(opt => opt.value === value);
+            return option ? option.label : '';
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Calendar navigation
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar();
+            });
+            
+            document.getElementById('todayBtn').addEventListener('click', () => {
+                currentDate = new Date();
+                updateCalendar();
+            });
+            
+            // Period selection
+            document.querySelectorAll('.semester-tab[data-period]').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    selectPeriod(tab.dataset.period);
+                });
+            });
+            
+            // Mode switching
+            document.getElementById('editMode').addEventListener('click', () => {
+                isEditMode = true;
+                document.getElementById('editMode').classList.add('active');
+                document.getElementById('viewMode').classList.remove('active');
+                document.getElementById('actionButtons').classList.remove('hidden');
+                document.getElementById('manageOptions').classList.remove('hidden');
+                document.getElementById('editNoteBtn').classList.remove('hidden');
+                loadScheduleForDate();
+            });
+            
+            document.getElementById('viewMode').addEventListener('click', () => {
+                if (hasUnsavedChanges) {
+                    const confirmSave = confirm('Ada perubahan yang belum disimpan. Apakah Anda ingin menyimpannya?');
+                    if (confirmSave) {
+                        saveSchedule();
+                    }
+                }
+                
+                isEditMode = false;
+                document.getElementById('viewMode').classList.add('active');
+                document.getElementById('editMode').classList.remove('active');
+                document.getElementById('actionButtons').classList.add('hidden');
+                document.getElementById('manageOptions').classList.add('hidden');
+                document.getElementById('editNoteBtn').classList.add('hidden');
+                loadScheduleForDate();
+            });
+            
+            // Action buttons
+            document.getElementById('saveBtn').addEventListener('click', saveSchedule);
+            document.getElementById('shareBtn').addEventListener('click', shareSchedule);
+            document.getElementById('clearBtn').addEventListener('click', clearSchedule);
+            document.getElementById('addScheduleBtn').addEventListener('click', addScheduleItem);
+            document.getElementById('createDefaultScheduleBtn').addEventListener('click', createDefaultSchedule);
+            document.getElementById('manageCoursesBtn').addEventListener('click', openCourseModal);
+            document.getElementById('manageLecturerBtn').addEventListener('click', openLecturerModal);
+            
+            // Note buttons
+            document.getElementById('editNoteBtn').addEventListener('click', editNote);
+            document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
+            document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+                document.getElementById('editNoteModal').style.display = 'none';
+            });
+            
+            // Manage options buttons
+            document.getElementById('manageTimeSlotsBtn').addEventListener('click', openTimeSlotsModal);
+            document.getElementById('manageActivityBtn').addEventListener('click', () => openAddOptionModal('activities'));
+            document.getElementById('manageClassBtn').addEventListener('click', () => openAddOptionModal('classes'));
+            document.getElementById('manageGroupBtn').addEventListener('click', () => openAddOptionModal('groups'));
+            
+            // Time slots modal buttons
+            document.getElementById('closeTimeSlotsModal').addEventListener('click', () => {
+                document.getElementById('timeSlotsModal').style.display = 'none';
+            });
+            
+            document.getElementById('addTimeSlotBtn').addEventListener('click', addTimeSlot);
+            document.getElementById('setDefaultTimeSlotsBtn').addEventListener('click', setDefaultTimeSlots);
+            document.getElementById('applyToAllDatesBtn').addEventListener('click', applyTimeSlotsToAllDates);
+            
+            // Course modal buttons
+            document.getElementById('closeCourseModal').addEventListener('click', () => {
+                document.getElementById('courseModal').style.display = 'none';
+            });
+            
+            document.getElementById('coursePeriod').addEventListener('change', loadCourses);
+            document.getElementById('courseSemester').addEventListener('change', loadCourses);
+            document.getElementById('addCourseBtn').addEventListener('click', addCourse);
+            
+            // Lecturer modal buttons
+            document.getElementById('closeLecturerModal').addEventListener('click', () => {
+                document.getElementById('lecturerModal').style.display = 'none';
+            });
+            
+            document.getElementById('lecturerPeriod').addEventListener('change', loadLecturers);
+            document.getElementById('lecturerSemester').addEventListener('change', loadLecturers);
+            document.getElementById('addLecturerBtn').addEventListener('click', addLecturer);
+            
+            // Modal controls
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('shareModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeEditNoteModal').addEventListener('click', () => {
+                document.getElementById('editNoteModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeOptionModal').addEventListener('click', () => {
+                document.getElementById('addOptionModal').style.display = 'none';
+            });
+            
+            document.getElementById('copyBtn').addEventListener('click', copyShareLink);
+            document.getElementById('saveOptionBtn').addEventListener('click', saveOption);
+            document.getElementById('cancelOptionBtn').addEventListener('click', () => {
+                document.getElementById('addOptionModal').style.display = 'none';
+            });
+            
+            // Close modals when clicking outside
+            document.getElementById('shareModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('shareModal')) {
+                    document.getElementById('shareModal').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('editNoteModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('editNoteModal')) {
+                    document.getElementById('editNoteModal').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('addOptionModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('addOptionModal')) {
+                    document.getElementById('addOptionModal').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('timeSlotsModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('timeSlotsModal')) {
+                    document.getElementById('timeSlotsModal').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('courseModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('courseModal')) {
+                    document.getElementById('courseModal').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('lecturerModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('lecturerModal')) {
+                    document.getElementById('lecturerModal').style.display = 'none';
+                }
+            });
+            
+            // Event delegation for delete and add buttons
+            document.getElementById('scheduleTableContainer').addEventListener('click', (e) => {
+                if (e.target.closest('.delete-item-btn')) {
+                    const scheduleId = e.target.closest('.delete-item-btn').dataset.scheduleId;
+                    deleteScheduleItem(scheduleId);
+                }
+                
+                if (e.target.closest('.add-item-btn')) {
+                    const scheduleId = e.target.closest('.add-item-btn').dataset.scheduleId;
+                    const groupIndex = e.target.closest('.add-item-btn').dataset.groupIndex;
+                    addScheduleItemWithSameTime(scheduleId, groupIndex);
+                }
+            });
+        }
+        
+        // Check for view mode in URL
+        function checkViewMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewData = urlParams.get('view');
+            
+            if (viewData) {
+                try {
+                    const decodedData = JSON.parse(atob(viewData));
+                    selectedDate = decodedData.date;
+                    
+                    // Set period and semester
+                    if (decodedData.period) {
+                        currentPeriod = decodedData.period;
+                        
+                        // Update UI
+                        document.querySelectorAll('.semester-tab[data-period]').forEach(tab => {
+                            if (tab.dataset.period === currentPeriod) {
+                                tab.classList.add('active');
+                            } else {
+                                tab.classList.remove('active');
+                            }
+                        });
+                    }
+                    
+                    if (decodedData.semester) {
+                        currentSemester = decodedData.semester;
+                        
+                        // Update UI
+                        updateSemesterTabs();
+                    }
+                    
+                    // Load note if shared
+                    if (decodedData.note) {
+                        noteData = decodedData.note;
+                        loadNote();
+                    }
+                    
+                    // Force view mode
+                    isEditMode = false;
+                    document.getElementById('viewMode').classList.add('active');
+                    document.getElementById('editMode').classList.remove('active');
+                    document.getElementById('actionButtons').classList.add('hidden');
+                    document.getElementById('manageOptions').classList.add('hidden');
+                    document.getElementById('editNoteBtn').classList.add('hidden');
+                    
+                    // Update displays
+                    updateCalendar();
+                    updateSelectedDateDisplay();
+                    
+                    // Load shared schedule
+                    const scheduleTableContainer = document.getElementById('scheduleTableContainer');
+                    const emptySchedule = document.getElementById('emptySchedule');
+                    const addScheduleContainer = document.getElementById('addScheduleContainer');
+                    
+                    scheduleTableContainer.innerHTML = '';
+                    
+                    if (decodedData.schedule && decodedData.schedule.length > 0) {
+                        emptySchedule.classList.add('hidden');
+                        
+                        // Group schedules by time slot
+                        const groupedSchedules = groupSchedulesByTime(decodedData.schedule);
+                        
+                        // Create table structure
+                        const table = document.createElement('table');
+                        table.className = 'schedule-table';
+                        
+                        // Create table header
+                        const thead = document.createElement('thead');
+                        thead.innerHTML = `
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Kegiatan</th>
+                                <th class="class-header">Kelas</th>
+                                <th class="group-header">Golongan</th>
+                                <th class="lecturer-header">Dosen</th>
+                                <th class="duration-header">Durasi</th>
+                                <th></th>
+                            </tr>
+                        `;
+                        table.appendChild(thead);
+                        
+                        // Create table body
+                        const tbody = document.createElement('tbody');
+                        
+                        groupedSchedules.forEach((group) => {
+                            group.schedules.forEach((schedule, index) => {
+                                const row = document.createElement('tr');
+                                
+                                const typeClass = schedule.type || '';
+                                const activityText = schedule.activity || '';
+                                const typeLabel = getOptionLabel('activities', schedule.type) || '';
+                                const classLabel = getOptionLabel('classes', schedule.class) || schedule.class || '-';
+                                const groupLabel = getOptionLabel('groups', schedule.group) || schedule.group || '-';
+                                const lecturerLabel = getLecturerName(schedule.lecturer) || schedule.lecturer || '-';
+                                
+                                // Determine if class/group columns should be shown
+                                const isLecture = schedule.type === 'lecture';
+                                const isPracticum = schedule.type === 'practicum';
+                                
+                                // For the first schedule in a group, show time
+                                const timeCell = index === 0 ? 
+                                    `<td class="time" rowspan="${group.schedules.length}">${schedule.time || ''}</td>` : '';
+                                
+                                row.innerHTML = `
+                                    ${timeCell}
+                                    <td>
+                                        <div class="activity ${typeClass}">
+                                            ${activityText || typeLabel}
+                                            ${activityText && typeLabel ? `<div class="activity-type">${typeLabel}</div>` : ''}
+                                        </div>
+                                    </td>
+                                    <td class="class-td">${isLecture || isPracticum ? classLabel : '<span class="no-class">-</span>'}</td>
+                                    <td class="group-td">${isPracticum ? groupLabel : '<span class="no-class">-</span>'}</td>
+                                    <td class="lecturer-td">${isLecture || isPracticum ? lecturerLabel : '<span class="no-class">-</span>'}</td>
+                                    <td class="duration-td">${schedule.duration || ''}</td>
+                                    <td></td>
+                                `;
+                                
+                                tbody.appendChild(row);
+                            });
+                        });
+                        
+                        table.appendChild(tbody);
+                        scheduleTableContainer.appendChild(table);
+                    } else {
+                        emptySchedule.classList.remove('hidden');
+                    }
+                    
+                    addScheduleContainer.classList.add('hidden');
+                } catch (e) {
+                    console.error('Error loading shared schedule:', e);
+                    showToast('Gagal memuat jadwal yang dibagikan', 'error');
+                }
+            }
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            checkViewMode();
+            initCalendar();
+        });
+    </script>
+</body>
+</html>
