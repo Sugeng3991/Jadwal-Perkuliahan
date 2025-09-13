@@ -920,6 +920,160 @@
             min-width: 150px;
         }
         
+        /* Style untuk Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .login-header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .login-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .login-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .login-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #2980b9;
+        }
+        
+        .cancel-login-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .cancel-login-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        .login-error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        /* Style untuk Code Preview */
+        .code-preview-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 300px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .code-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 8px;
+        }
+        
+        .code-preview-title {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .code-preview-close {
+            background: none;
+            border: none;
+            color: #ecf0f1;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .code-preview-content {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .code-preview-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+            font-size: 1.2rem;
+        }
+        
         @media (max-width: 768px) {
             .calendar-grid {
                 gap: 2px;
@@ -972,6 +1126,12 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+            
+            .code-preview-container {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
         }
     </style>
 </head>
@@ -980,10 +1140,10 @@
         <header>
             <h1>Sistem Jadwal Perkuliahan</h1>
             <div class="mode-controls">
-                <button class="mode-btn active" id="editMode">
+                <button class="mode-btn" id="editMode">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="mode-btn" id="viewMode">
+                <button class="mode-btn active" id="viewMode">
                     <i class="fas fa-eye"></i> View
                 </button>
             </div>
@@ -1101,6 +1261,27 @@
         <footer>
             <p>© 2023 Sistem Informasi Akademik | Setiap tanggal dapat memiliki jadwal tak terbatas</p>
         </footer>
+    </div>
+    
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-modal-content">
+            <div class="login-header">
+                <h2>Login untuk Mode Edit</h2>
+                <p>Masukkan password untuk mengakses mode edit</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" class="login-input" placeholder="Masukkan password">
+                    <div class="login-error" id="loginError"></div>
+                </div>
+                <div class="login-buttons">
+                    <button type="submit" class="login-btn">Login</button>
+                    <button type="button" class="cancel-login-btn" id="cancelLoginBtn">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <!-- Share Modal -->
@@ -1361,16 +1542,36 @@
     
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
+    
+    <!-- Code Preview Toggle Button -->
+    <button class="code-preview-toggle" id="codePreviewToggle">
+        <i class="fas fa-code"></i>
+    </button>
+    
+    <!-- Code Preview Container -->
+    <div class="code-preview-container" id="codePreviewContainer">
+        <div class="code-preview-header">
+            <div class="code-preview-title">Preview Kode</div>
+            <button class="code-preview-close" id="codePreviewClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="code-preview-content" id="codePreviewContent"></div>
+    </div>
+    
     <script>
         // Global variables
         let currentDate = new Date();
         let selectedDate = null;
-        let isEditMode = true;
+        let isEditMode = false; // Changed default to view mode
         let scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || {};
         let hasUnsavedChanges = false;
         let currentOptionType = '';
         let currentPeriod = 'gasal'; // Default to gasal
         let currentSemester = '1'; // Default to semester 1
+        
+        // Password for edit mode
+        const EDIT_PASSWORD = "admin123"; // You can change this password
         
         // Default note content
         const defaultNote = {
@@ -1551,6 +1752,12 @@
             setupEventListeners();
             loadNote();
             updateSemesterTabs();
+            
+            // Set initial mode to view mode
+            setViewMode();
+            
+            // Initialize code preview
+            initCodePreview();
         }
         
         // Update calendar display
@@ -3319,30 +3526,36 @@
             
             // Mode switching
             document.getElementById('editMode').addEventListener('click', () => {
-                isEditMode = true;
-                document.getElementById('editMode').classList.add('active');
-                document.getElementById('viewMode').classList.remove('active');
-                document.getElementById('actionButtons').classList.remove('hidden');
-                document.getElementById('manageOptions').classList.remove('hidden');
-                document.getElementById('editNoteBtn').classList.remove('hidden');
-                loadScheduleForDate();
+                // Show login modal instead of directly switching to edit mode
+                document.getElementById('loginModal').style.display = 'flex';
             });
             
             document.getElementById('viewMode').addEventListener('click', () => {
-                if (hasUnsavedChanges) {
-                    const confirmSave = confirm('Ada perubahan yang belum disimpan. Apakah Anda ingin menyimpannya?');
-                    if (confirmSave) {
-                        saveSchedule();
-                    }
-                }
+                setViewMode();
+            });
+            
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('loginPassword').value;
+                const loginError = document.getElementById('loginError');
                 
-                isEditMode = false;
-                document.getElementById('viewMode').classList.add('active');
-                document.getElementById('editMode').classList.remove('active');
-                document.getElementById('actionButtons').classList.add('hidden');
-                document.getElementById('manageOptions').classList.add('hidden');
-                document.getElementById('editNoteBtn').classList.add('hidden');
-                loadScheduleForDate();
+                if (password === EDIT_PASSWORD) {
+                    // Correct password, switch to edit mode
+                    setEditMode();
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('loginPassword').value = '';
+                    loginError.textContent = '';
+                } else {
+                    // Incorrect password
+                    loginError.textContent = 'Password salah! Silakan coba lagi.';
+                }
+            });
+            
+            document.getElementById('cancelLoginBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginError').textContent = '';
             });
             
             // Action buttons
@@ -3465,6 +3678,28 @@
             });
         }
         
+        // Set view mode
+        function setViewMode() {
+            isEditMode = false;
+            document.getElementById('viewMode').classList.add('active');
+            document.getElementById('editMode').classList.remove('active');
+            document.getElementById('actionButtons').classList.add('hidden');
+            document.getElementById('manageOptions').classList.add('hidden');
+            document.getElementById('editNoteBtn').classList.add('hidden');
+            loadScheduleForDate();
+        }
+        
+        // Set edit mode
+        function setEditMode() {
+            isEditMode = true;
+            document.getElementById('editMode').classList.add('active');
+            document.getElementById('viewMode').classList.remove('active');
+            document.getElementById('actionButtons').classList.remove('hidden');
+            document.getElementById('manageOptions').classList.remove('hidden');
+            document.getElementById('editNoteBtn').classList.remove('hidden');
+            loadScheduleForDate();
+        }
+        
         // Check for view mode in URL
         function checkViewMode() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -3503,12 +3738,7 @@
                     }
                     
                     // Force view mode
-                    isEditMode = false;
-                    document.getElementById('viewMode').classList.add('active');
-                    document.getElementById('editMode').classList.remove('active');
-                    document.getElementById('actionButtons').classList.add('hidden');
-                    document.getElementById('manageOptions').classList.add('hidden');
-                    document.getElementById('editNoteBtn').classList.add('hidden');
+                    setViewMode();
                     
                     // Update displays
                     updateCalendar();
@@ -3601,6 +3831,29 @@
             }
         }
         
+        // Initialize code preview
+        function initCodePreview() {
+            const codePreviewToggle = document.getElementById('codePreviewToggle');
+            const codePreviewContainer = document.getElementById('codePreviewContainer');
+            const codePreviewClose = document.getElementById('codePreviewClose');
+            const codePreviewContent = document.getElementById('codePreviewContent');
+            
+            codePreviewToggle.addEventListener('click', () => {
+                if (codePreviewContainer.style.display === 'flex') {
+                    codePreviewContainer.style.display = 'none';
+                } else {
+                    // Get current HTML code
+                    const htmlCode = document.documentElement.outerHTML;
+                    codePreviewContent.textContent = htmlCode;
+                    codePreviewContainer.style.display = 'flex';
+                }
+            });
+            
+            codePreviewClose.addEventListener('click', () => {
+                codePreviewContainer.style.display = 'none';
+            });
+        }
+        
         // Initialize app
         document.addEventListener('DOMContentLoaded', () => {
             checkViewMode();
@@ -3608,5 +3861,4 @@
         });
     </script>
 </body>
-
 </html>
