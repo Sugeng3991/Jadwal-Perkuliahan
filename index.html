@@ -117,6 +117,43 @@
             border-bottom: 1px solid #dee2e6;
         }
         
+        .calendar-filter {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .calendar-filter label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .calendar-filter select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .calendar-filter button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .calendar-filter button:hover {
+            background: #2980b9;
+        }
+        
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -361,6 +398,24 @@
             margin-top: 3px;
         }
         
+        .online-status {
+            font-size: 0.85rem;
+            margin-top: 3px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .online-status.online {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .online-status.offline {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
         .class-group {
             display: flex;
             gap: 10px;
@@ -466,6 +521,17 @@
             margin-top: 8px;
         }
         
+        .activity-details-container {
+            margin-top: 8px;
+        }
+        
+        .prayer-time-input {
+            background-color: #f3e5f5;
+            border-left: 4px solid #8e44ad;
+            padding: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+        
         .note {
             background: #fffde7;
             border-left: 4px solid #fbc02d;
@@ -495,7 +561,7 @@
             color: #e65100;
         }
         
-        .share-modal, .add-option-modal, .edit-note-modal, .time-slots-modal, .course-modal, .lecturer-modal {
+        .share-modal, .add-option-modal, .edit-note-modal, .time-slots-modal, .course-modal, .lecturer-modal, .login-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -516,6 +582,15 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+        }
+        
+        .login-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
         .modal-header {
@@ -920,29 +995,6 @@
             min-width: 150px;
         }
         
-        /* Style untuk Login Modal */
-        .login-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .login-modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
         .login-header {
             text-align: center;
             margin-bottom: 20px;
@@ -1007,44 +1059,6 @@
             font-size: 0.9rem;
             margin-top: 5px;
             text-align: center;
-        }
-        
-        /* Style untuk Calendar Filter */
-        .calendar-filter {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .calendar-filter label {
-            font-weight: 500;
-            color: #2c3e50;
-        }
-        
-        .calendar-filter select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        
-        .calendar-filter button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .calendar-filter button:hover {
-            background: #2980b9;
         }
         
         @media (max-width: 768px) {
@@ -1565,9 +1579,9 @@
         
         // Prayer times from note
         const prayerTimes = {
-            dhuha: { start: "08:40", end: "09:10" },
-            dzuhur: { start: "11:40", end: "12:40" },
-            ashar: { start: "15:10", end: "15:30" }
+            dhuha: { start: "08:40", end: "09:10", description: "Waktu shalat Dhuha pada jam 08:40 - 09:10" },
+            dzuhur: { start: "11:40", end: "12:40", description: "Waktu shalat Dzuhur pada jam 11:40 - 12:40" },
+            ashar: { start: "15:10", end: "15:30", description: "Waktu shalat Ashar pada jam 15:10 - 15:30" }
         };
         
         // Default time slots
@@ -1984,19 +1998,31 @@
             // Extract Dhuha time
             const dhuhaMatch = content.match(/Waktu shalat Dhuha:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
             if (dhuhaMatch) {
-                prayerTimes.dhuha = { start: dhuhaMatch[1], end: dhuhaMatch[2] };
+                prayerTimes.dhuha = { 
+                    start: dhuhaMatch[1], 
+                    end: dhuhaMatch[2],
+                    description: "Waktu shalat Dhuha pada jam " + dhuhaMatch[1] + " - " + dhuhaMatch[2]
+                };
             }
             
             // Extract Dzuhur time
             const dzuhurMatch = content.match(/Waktu shalat Dzuhur:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
             if (dzuhurMatch) {
-                prayerTimes.dzuhur = { start: dzuhurMatch[1], end: dzuhurMatch[2] };
+                prayerTimes.dzuhur = { 
+                    start: dzuhurMatch[1], 
+                    end: dzuhurMatch[2],
+                    description: "Waktu shalat Dzuhur pada jam " + dzuhurMatch[1] + " - " + dzuhurMatch[2]
+                };
             }
             
             // Extract Ashar time
             const asharMatch = content.match(/Waktu shalat Ashar:\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
             if (asharMatch) {
-                prayerTimes.ashar = { start: asharMatch[1], end: asharMatch[2] };
+                prayerTimes.ashar = { 
+                    start: asharMatch[1], 
+                    end: asharMatch[2],
+                    description: "Waktu shalat Ashar pada jam " + asharMatch[1] + " - " + asharMatch[2]
+                };
             }
         }
         
@@ -2144,6 +2170,7 @@
                             // Edit mode
                             const isLecture = schedule.type === 'lecture';
                             const isPracticum = schedule.type === 'practicum';
+                            const isPrayer = schedule.type === 'prayer';
                             
                             // Parse time for edit mode
                             let startTime = '';
@@ -2163,83 +2190,96 @@
                                 </td>
                             ` : '';
                             
-                            // MODIFIKASI: Menampilkan dropdown mata kuliah untuk perkuliahan dan praktikum
-                            if (isLecture || isPracticum) {
-                                row.innerHTML = `
-                                    ${timeCell}
-                                    <td>
-                                        <select class="edit-select type-select" data-field="type" data-schedule-id="${schedule.id}">
-                                            ${generateOptions('activities', schedule.type)}
-                                        </select>
-                                        <div class="course-select-container">
-                                            <select class="edit-select course-select" data-field="activity" data-schedule-id="${schedule.id}">
-                                                <option value="">-- Pilih Mata Kuliah --</option>
-                                                ${generateCourseOptions(schedule.activity)}
-                                            </select>
-                                        </div>
-                                    </td>
-                                    <td class="class-td">
-                                        <select class="edit-select class-select" data-field="class" data-schedule-id="${schedule.id}">
+                            // PERBAIKAN: Selalu tampilkan dropdown "Pilih Kegiatan" dan input teks untuk baris baru
+                            row.innerHTML = `
+                                ${timeCell}
+                                <td>
+                                    <select class="edit-select type-select" data-field="type" data-schedule-id="${schedule.id}">
+                                        ${generateOptions('activities', schedule.type)}
+                                    </select>
+                                    <div class="activity-details-container" id="activity-details-${schedule.id}">
+                                        <!-- Activity details will be rendered here based on selected type -->
+                                    </div>
+                                </td>
+                                <td class="class-td">
+                                    ${isLecture || isPracticum ? 
+                                        `<select class="edit-select class-select" data-field="class" data-schedule-id="${schedule.id}">
                                             ${generateOptions('classes', schedule.class)}
-                                        </select>
-                                    </td>
-                                    <td class="group-td">
-                                        ${isPracticum ? 
-                                            `<select class="edit-select group-select" data-field="group" data-schedule-id="${schedule.id}">
-                                                <option value="">-- Pilih Golongan --</option>
-                                                ${generateGroupOptions(schedule.class, schedule.group)}
-                                            </select>` : 
-                                            '<span class="no-class">-</span>'}
-                                    </td>
-                                    <td class="lecturer-td">
-                                        <select class="edit-select lecturer-select" data-field="lecturer" data-schedule-id="${schedule.id}">
+                                        </select>` : 
+                                        '<span class="no-class">-</span>'}
+                                </td>
+                                <td class="group-td">
+                                    ${isPracticum ? 
+                                        `<select class="edit-select group-select" data-field="group" data-schedule-id="${schedule.id}">
+                                            <option value="">-- Pilih Golongan --</option>
+                                            ${generateGroupOptions(schedule.class, schedule.group)}
+                                        </select>` : 
+                                        '<span class="no-class">-</span>'}
+                                </td>
+                                <td class="lecturer-td">
+                                    ${isLecture || isPracticum ? 
+                                        `<select class="edit-select lecturer-select" data-field="lecturer" data-schedule-id="${schedule.id}">
                                             <option value="">-- Pilih Dosen --</option>
                                             ${generateLecturerOptions(schedule.lecturer)}
-                                        </select>
-                                    </td>
-                                    <td class="duration-td">
-                                        <input type="text" class="edit-input duration-input" value="${schedule.duration || ''}" data-field="duration" data-schedule-id="${schedule.id}" readonly style="background-color: #f8f9fa; cursor: default;">
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-primary btn-icon add-item-btn" data-schedule-id="${schedule.id}" data-group-index="${groupIndex}" title="Tambah baris dengan waktu yang sama">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-icon delete-item-btn" data-schedule-id="${schedule.id}" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                `;
-                            } else {
-                                row.innerHTML = `
-                                    ${timeCell}
-                                    <td>
-                                        <select class="edit-select type-select" data-field="type" data-schedule-id="${schedule.id}">
-                                            ${generateOptions('activities', schedule.type)}
-                                        </select>
-                                        <input type="text" class="edit-input" value="${schedule.activity || ''}" data-field="activity" data-schedule-id="${schedule.id}" style="margin-top: 5px;" placeholder="Nama kegiatan">
-                                    </td>
-                                    <td class="class-td">
-                                        <span class="no-class">-</span>
-                                    </td>
-                                    <td class="group-td">
-                                        <span class="no-class">-</span>
-                                    </td>
-                                    <td class="lecturer-td">
-                                        <span class="no-class">-</span>
-                                    </td>
-                                    <td class="duration-td">
-                                        <input type="text" class="edit-input duration-input" value="${schedule.duration || ''}" data-field="duration" data-schedule-id="${schedule.id}" readonly style="background-color: #f8f9fa; cursor: default;">
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-primary btn-icon add-item-btn" data-schedule-id="${schedule.id}" data-group-index="${groupIndex}" title="Tambah baris dengan waktu yang sama">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-icon delete-item-btn" data-schedule-id="${schedule.id}" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                `;
-                            }
+                                        </select>` : 
+                                        '<span class="no-class">-</span>'}
+                                </td>
+                                <td class="duration-td">
+                                    <input type="text" class="edit-input duration-input" value="${schedule.duration || ''}" data-field="duration" data-schedule-id="${schedule.id}" readonly style="background-color: #f8f9fa; cursor: default;">
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-icon add-item-btn" data-schedule-id="${schedule.id}" data-group-index="${groupIndex}" title="Tambah baris dengan waktu yang sama">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-icon delete-item-btn" data-schedule-id="${schedule.id}" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            
+                            // Add row to tbody before rendering activity details
+                            tbody.appendChild(row);
+                            
+                            // Render activity details based on type after row is added to DOM
+                            setTimeout(() => {
+                                renderActivityDetails(schedule);
+                                
+                                // PERBAIKAN: Tambahkan event listener untuk semua select dan input
+                                const inputs = scheduleTableContainer.querySelectorAll('.edit-input');
+                                inputs.forEach(input => {
+                                    input.addEventListener('change', updateScheduleData);
+                                    
+                                    // Special handling for time inputs
+                                    if (input.classList.contains('time-start') || input.classList.contains('time-end')) {
+                                        input.addEventListener('change', updateTimeSlot);
+                                    }
+                                });
+                                
+                                const selects = scheduleTableContainer.querySelectorAll('.edit-select');
+                                selects.forEach(select => {
+                                    select.addEventListener('change', updateScheduleData);
+                                    
+                                    // Special handling for type select
+                                    if (select.classList.contains('type-select')) {
+                                        select.addEventListener('change', handleTypeChange);
+                                    }
+                                    
+                                    // Special handling for class select
+                                    if (select.classList.contains('class-select')) {
+                                        select.addEventListener('change', handleClassChange);
+                                    }
+                                    
+                                    // Special handling for course select
+                                    if (select.classList.contains('course-select')) {
+                                        select.addEventListener('change', updateScheduleData);
+                                    }
+                                    
+                                    // Special handling for online select
+                                    if (select.classList.contains('online-select')) {
+                                        select.addEventListener('change', updateScheduleData);
+                                    }
+                                });
+                            }, 10);
                         } else {
                             // View mode
                             const typeClass = schedule.type || '';
@@ -2257,12 +2297,19 @@
                             const timeCell = index === 0 ? 
                                 `<td class="time" rowspan="${group.schedules.length}">${schedule.time || ''}</td>` : '';
                             
+                            // PERBAIKAN: Tampilkan status online/offline untuk perkuliahan
+                            let onlineStatusHtml = '';
+                            if (isLecture && schedule.isOnline) {
+                                onlineStatusHtml = `<div class="online-status ${schedule.isOnline}">${schedule.isOnline === 'online' ? 'Online' : 'Offline'}</div>`;
+                            }
+                            
                             row.innerHTML = `
                                 ${timeCell}
                                 <td>
                                     <div class="activity ${typeClass}">
                                         ${activityText || typeLabel}
                                         ${activityText && typeLabel ? `<div class="activity-type">${typeLabel}</div>` : ''}
+                                        ${onlineStatusHtml}
                                     </div>
                                 </td>
                                 <td class="class-td">${isLecture || isPracticum ? classLabel : '<span class="no-class">-</span>'}</td>
@@ -2271,57 +2318,25 @@
                                 <td class="duration-td">${schedule.duration || ''}</td>
                                 <td></td>
                             `;
+                            
+                            // Add row to tbody
+                            tbody.appendChild(row);
                         }
-                        
-                        tbody.appendChild(row);
                     });
                 });
                 
                 table.appendChild(tbody);
                 scheduleTableContainer.appendChild(table);
                 
-                // Add event listeners for edit inputs
-                if (isEditMode) {
-                    const inputs = scheduleTableContainer.querySelectorAll('.edit-input');
-                    inputs.forEach(input => {
-                        input.addEventListener('change', updateScheduleData);
-                        
-                        // Special handling for time inputs
-                        if (input.classList.contains('time-start') || input.classList.contains('time-end')) {
-                            input.addEventListener('change', updateTimeSlot);
+                // Focus on the new item's activity input if focusScheduleId is provided
+                if (focusScheduleId && isEditMode) {
+                    setTimeout(() => {
+                        const typeSelect = scheduleTableContainer.querySelector(`select[data-field="type"][data-schedule-id="${focusScheduleId}"]`);
+                        if (typeSelect) {
+                            typeSelect.focus();
+                            typeSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
-                    });
-                    
-                    const selects = scheduleTableContainer.querySelectorAll('.edit-select');
-                    selects.forEach(select => {
-                        select.addEventListener('change', updateScheduleData);
-                        
-                        // Special handling for type select
-                        if (select.classList.contains('type-select')) {
-                            select.addEventListener('change', handleTypeChange);
-                        }
-                        
-                        // Special handling for class select
-                        if (select.classList.contains('class-select')) {
-                            select.addEventListener('change', handleClassChange);
-                        }
-                        
-                        // Special handling for course select
-                        if (select.classList.contains('course-select')) {
-                            select.addEventListener('change', updateScheduleData);
-                        }
-                    });
-                    
-                    // Focus on the new item's activity input if focusScheduleId is provided
-                    if (focusScheduleId) {
-                        setTimeout(() => {
-                            const activityInput = scheduleTableContainer.querySelector(`input[data-field="activity"][data-schedule-id="${focusScheduleId}"]`);
-                            if (activityInput) {
-                                activityInput.focus();
-                                activityInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }
-                        }, 100);
-                    }
+                    }, 100);
                 }
             }
             
@@ -2340,6 +2355,85 @@
         // Load schedule for selected date (wrapper function)
         function loadScheduleForDate() {
             loadScheduleForDateWithFocus(null);
+        }
+        
+        // Render activity details based on type
+        function renderActivityDetails(schedule) {
+            const container = document.getElementById(`activity-details-${schedule.id}`);
+            if (!container) return;
+            
+            const isLecture = schedule.type === 'lecture';
+            const isPracticum = schedule.type === 'practicum';
+            const isPrayer = schedule.type === 'prayer';
+            
+            if (isLecture || isPracticum) {
+                // Show course dropdown for lecture and practicum
+                let onlineOfflineHtml = '';
+                
+                // PERBAIKAN: Tambahkan opsi online/offline untuk perkuliahan
+                if (isLecture) {
+                    onlineOfflineHtml = `
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Mode:</label>
+                            <select class="edit-select online-select" data-field="isOnline" data-schedule-id="${schedule.id}">
+                                <option value="">-- Pilih Mode --</option>
+                                <option value="online" ${schedule.isOnline === 'online' ? 'selected' : ''}>Online</option>
+                                <option value="offline" ${schedule.isOnline === 'offline' ? 'selected' : ''}>Offline</option>
+                            </select>
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = `
+                    <div class="course-select-container">
+                        <select class="edit-select course-select" data-field="activity" data-schedule-id="${schedule.id}">
+                            <option value="">-- Pilih Mata Kuliah --</option>
+                            ${generateCourseOptions(schedule.activity)}
+                        </select>
+                        ${onlineOfflineHtml}
+                    </div>
+                `;
+                
+                // PERBAIKAN: Tambahkan event listener untuk course select dan online select
+                const courseSelect = container.querySelector('.course-select');
+                if (courseSelect) {
+                    courseSelect.addEventListener('change', updateScheduleData);
+                }
+                
+                const onlineSelect = container.querySelector('.online-select');
+                if (onlineSelect) {
+                    onlineSelect.addEventListener('change', updateScheduleData);
+                }
+            } else if (isPrayer) {
+                // Show prayer time input with description
+                const prayerType = getPrayerTypeForSchedule(schedule);
+                const prayerDescription = prayerType ? prayerTimes[prayerType].description : '';
+                
+                container.innerHTML = `
+                    <div class="prayer-time-input">
+                        <input type="text" class="edit-input" value="${prayerDescription}" data-field="activity" data-schedule-id="${schedule.id}" readonly style="background-color: #f3e5f5; cursor: default;">
+                    </div>
+                `;
+            } else {
+                // Show text input for other activity types
+                container.innerHTML = `
+                    <input type="text" class="edit-input" value="${schedule.activity || ''}" data-field="activity" data-schedule-id="${schedule.id}" style="margin-top: 5px;" placeholder="Nama kegiatan">
+                `;
+                
+                // PERBAIKAN: Tambahkan event listener untuk activity input
+                const activityInput = container.querySelector('input[data-field="activity"]');
+                if (activityInput) {
+                    activityInput.addEventListener('change', updateScheduleData);
+                }
+            }
+        }
+        
+        // Get prayer type for a schedule based on its time
+        function getPrayerTypeForSchedule(schedule) {
+            if (!schedule.time || !schedule.time.includes(' - ')) return null;
+            
+            const [startTime] = schedule.time.split(' - ');
+            return isPrayerTime(startTime);
         }
         
         // Update time slot for all schedules in a group
@@ -2371,6 +2465,12 @@
                 group.schedules.forEach(schedule => {
                     schedule.time = `${group.startTime} - ${group.endTime}`;
                     schedule.duration = calculateDuration(group.startTime, group.endTime);
+                    
+                    // Check if this is a prayer time and update accordingly
+                    const prayerType = isPrayerTime(group.startTime);
+                    if (prayerType && schedule.type === 'prayer') {
+                        schedule.activity = prayerTimes[prayerType].description;
+                    }
                 });
                 
                 hasUnsavedChanges = true;
@@ -2399,7 +2499,13 @@
             // Find the schedule by ID
             const schedule = scheduleData[scheduleKey][selectedDate].find(s => s.id === scheduleId);
             if (schedule) {
+                // PERBAIKAN: Pastikan field isOnline tersimpan dengan benar
                 schedule[field] = event.target.value;
+                
+                // Jika field adalah isOnline dan tidak ada nilai, hapus field tersebut
+                if (field === 'isOnline' && !event.target.value) {
+                    delete schedule[field];
+                }
             }
         }
         
@@ -2407,11 +2513,6 @@
         function handleTypeChange(event) {
             const scheduleId = event.target.dataset.scheduleId;
             const type = event.target.value;
-            const row = event.target.closest('tr');
-            const activityCell = row.querySelector('td:nth-child(2)');
-            const classTd = row.querySelector('.class-td');
-            const groupTd = row.querySelector('.group-td');
-            const lecturerTd = row.querySelector('.lecturer-td');
             
             const scheduleKey = getScheduleDataKey();
             if (!scheduleData[scheduleKey] || !scheduleData[scheduleKey][selectedDate]) return;
@@ -2425,53 +2526,44 @@
             const isPracticum = type === 'practicum';
             const isPrayer = type === 'prayer';
             
-            // PERBAIKAN: Jika berubah dari Perkuliahan/Praktikum ke jenis lain, kosongkan activity
+            // Update the type in schedule data
+            schedule.type = type;
+            
+            // PERBAIKAN: Reset isOnline jika bukan perkuliahan
+            if (!isLecture) {
+                schedule.isOnline = '';
+            }
+            
+            // Jika berubah dari Perkuliahan/Praktikum ke jenis lain, kosongkan activity
             const wasLectureOrPracticum = schedule.type === 'lecture' || schedule.type === 'practicum';
             
-            // Update activity cell based on type
-            if (isLecture || isPracticum) {
-                // Show course dropdown for lecture and practicum
-                activityCell.innerHTML = `
-                    <select class="edit-select type-select" data-field="type" data-schedule-id="${scheduleId}">
-                        ${generateOptions('activities', type)}
-                    </select>
-                    <div class="course-select-container">
-                        <select class="edit-select course-select" data-field="activity" data-schedule-id="${scheduleId}">
-                            <option value="">-- Pilih Mata Kuliah --</option>
-                            ${generateCourseOptions(schedule.activity)}
-                        </select>
-                    </div>
-                `;
-                
-                // Add event listener to the new type select
-                const newTypeSelect = activityCell.querySelector('.type-select');
-                newTypeSelect.addEventListener('change', handleTypeChange);
-                
-                // Add event listener to the new course select
-                const newCourseSelect = activityCell.querySelector('.course-select');
-                newCourseSelect.addEventListener('change', updateScheduleData);
-            } else {
-                // Show text input for other activity types
-                activityCell.innerHTML = `
-                    <select class="edit-select type-select" data-field="type" data-schedule-id="${scheduleId}">
-                        ${generateOptions('activities', type)}
-                    </select>
-                    <input type="text" class="edit-input" value="${wasLectureOrPracticum ? '' : (schedule.activity || '')}" data-field="activity" data-schedule-id="${scheduleId}" style="margin-top: 5px;" placeholder="Nama kegiatan">
-                `;
-                
-                // Add event listener to the new type select
-                const newTypeSelect = activityCell.querySelector('.type-select');
-                newTypeSelect.addEventListener('change', handleTypeChange);
-                
-                // Add event listener to the new activity input
-                const newActivityInput = activityCell.querySelector('input[data-field="activity"]');
-                newActivityInput.addEventListener('change', updateScheduleData);
-                
-                // PERBAIKAN: Jika berubah dari Perkuliahan/Praktikum ke jenis lain, kosongkan activity di data
-                if (wasLectureOrPracticum) {
-                    schedule.activity = '';
+            // If changing to prayer type, set activity to prayer description
+            if (isPrayer && schedule.time) {
+                const [startTime] = schedule.time.split(' - ');
+                const prayerType = isPrayerTime(startTime);
+                if (prayerType) {
+                    // PERBAIKAN: Gunakan keterangan shalat yang sesuai
+                    if (prayerType === 'dhuha') {
+                        schedule.activity = 'Waktu Shalat Dhuha';
+                    } else if (prayerType === 'dzuhur') {
+                        schedule.activity = 'Waktu Shalat Dzuhur';
+                    } else if (prayerType === 'ashar') {
+                        schedule.activity = 'Waktu Shalat Ashar';
+                    }
                 }
+            } else if (wasLectureOrPracticum && !isLecture && !isPracticum) {
+                // If changing from lecture/practicum to other types, clear activity
+                schedule.activity = '';
             }
+            
+            // Render activity details based on new type
+            renderActivityDetails(schedule);
+            
+            // Update other cells based on type
+            const row = event.target.closest('tr');
+            const classTd = row.querySelector('.class-td');
+            const groupTd = row.querySelector('.group-td');
+            const lecturerTd = row.querySelector('.lecturer-td');
             
             // Update class column
             if (isLecture || isPracticum) {
@@ -2607,23 +2699,24 @@
             // Generate unique ID for the new schedule
             const newScheduleId = Date.now().toString();
             
-            // Create new schedule with the same time but empty other fields
+            // PERBAIKAN: Baris baru harus memiliki type kosong agar menampilkan "-- Pilih Kegiatan --"
             const newSchedule = {
                 id: newScheduleId,
                 time: originalSchedule.time,
-                activity: "",
-                type: "",
-                class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
-                group: "",
-                lecturer: "",
-                duration: originalSchedule.duration
+                activity: "", // Kosongkan activity agar user harus memilih
+                type: "", // PERBAIKAN: Type kosong agar menampilkan "-- Pilih Kegiatan --"
+                class: originalSchedule.class || "",
+                group: originalSchedule.group || "",
+                lecturer: originalSchedule.lecturer || "",
+                duration: originalSchedule.duration,
+                isOnline: "" // PERBAIKAN: Tambahkan field isOnline
             };
             
             // Add to schedule data
             scheduleData[scheduleKey][selectedDate].push(newSchedule);
             hasUnsavedChanges = true;
             
-            // Reload schedule and focus on the new item's activity input
+            // Reload schedule and focus on the new item's type select
             loadScheduleForDateWithFocus(newScheduleId);
         }
         
@@ -2634,12 +2727,19 @@
                 return;
             }
             
+            // PERBAIKAN: Pastikan semua data tersimpan dengan benar
             localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
             hasUnsavedChanges = false;
             updateCalendar();
-            loadScheduleForDate();
             
-            showToast('Jadwal berhasil disimpan!', 'success');
+            // PERBAIKAN: Tetap di mode edit setelah menyimpan dan muat ulang data
+            if (isEditMode) {
+                loadScheduleForDate();
+                showToast('Jadwal berhasil disimpan!', 'success');
+            } else {
+                loadScheduleForDate();
+                showToast('Jadwal berhasil disimpan!', 'success');
+            }
         }
         
         // Clear schedule for selected date
@@ -2696,18 +2796,21 @@
             let endTime = '';
             let duration = '';
             let type = '';
+            let activity = '';
             
             if (prayerType) {
                 // If it's a prayer time, use prayer settings
                 endTime = prayerTimes[prayerType].end;
                 duration = calculateDuration(startTime, endTime);
                 type = 'prayer';
+                activity = prayerTimes[prayerType].description;
             } else {
                 // Otherwise, use standard 50-minute duration from the start time
                 endTime = addMinutesToTime(startTime, 50);
                 duration = '50 menit';
-                // Set empty type to show "Pilih Kegiatan" option
-                type = '';
+                // PERBAIKAN: Type kosong agar menampilkan "-- Pilih Kegiatan --"
+                type = "";
+                activity = "";
             }
             
             // Generate unique ID for the schedule
@@ -2716,12 +2819,13 @@
             const newItem = {
                 id: scheduleId,
                 time: `${startTime} - ${endTime}`,
-                activity: "",
-                type: type,
-                class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
+                activity: activity,
+                type: type, // PERBAIKAN: Type kosong agar menampilkan "-- Pilih Kegiatan --"
+                class: "",
                 group: "",
                 lecturer: "",
-                duration: duration
+                duration: duration,
+                isOnline: "" // PERBAIKAN: Tambahkan field isOnline
             };
             
             scheduleData[scheduleKey][selectedDate].push(newItem);
@@ -2759,6 +2863,7 @@
                 let isPrayerTime = false;
                 let prayerName = '';
                 let type = '';
+                let activity = '';
                 
                 // Cek untuk setiap waktu shalat
                 for (const [prayer, times] of Object.entries(prayerTimes)) {
@@ -2766,6 +2871,14 @@
                         isPrayerTime = true;
                         prayerName = prayer;
                         type = 'prayer';
+                        // PERBAIKAN: Tambahkan keterangan shalat sesuai permintaan
+                        if (prayer === 'dhuha') {
+                            activity = 'Waktu Shalat Dhuha';
+                        } else if (prayer === 'dzuhur') {
+                            activity = 'Waktu Shalat Dzuhur';
+                        } else if (prayer === 'ashar') {
+                            activity = 'Waktu Shalat Ashar';
+                        }
                         break;
                     }
                 }
@@ -2777,12 +2890,13 @@
                 const newItem = {
                     id: scheduleId,
                     time: `${startTime} - ${endTime}`,
-                    activity: isPrayerTime ? `Shalat ${prayerName.charAt(0).toUpperCase() + prayerName.slice(1)}` : "",
+                    activity: activity,
                     type: type,
                     class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
                     group: "",
                     lecturer: "",
-                    duration: duration
+                    duration: duration,
+                    isOnline: "" // PERBAIKAN: Tambahkan field isOnline
                 };
                 
                 scheduleData[scheduleKey][selectedDate].push(newItem);
@@ -3015,6 +3129,7 @@
         function copyShareLink() {
             const shareLink = document.getElementById('shareLink');
             shareLink.select();
+            shareLink.setSelectionRange(0, 99999);
             document.execCommand('copy');
             
             showToast('Link berhasil disalin!', 'success');
@@ -3164,9 +3279,11 @@
                         // Check if this time slot is a prayer time
                         const prayerType = isPrayerTime(startTime);
                         let type = '';
+                        let activity = '';
                         
                         if (prayerType) {
                             type = 'prayer';
+                            activity = prayerTimes[prayerType].description;
                         }
                         
                         // Generate unique ID for the schedule
@@ -3175,12 +3292,13 @@
                         const newItem = {
                             id: scheduleId,
                             time: `${startTime} - ${endTime}`,
-                            activity: "",
+                            activity: activity,
                             type: type,
                             class: "", // MODIFIKASI: Mengubah dari "A" menjadi "" agar defaultnya "Pilih Kelas"
                             group: "",
                             lecturer: "",
-                            duration: duration
+                            duration: duration,
+                            isOnline: "" // PERBAIKAN: Tambahkan field isOnline
                         };
                         
                         scheduleData[key][date].push(newItem);
@@ -3202,6 +3320,33 @@
             document.getElementById('courseModal').style.display = 'flex';
             document.getElementById('coursePeriod').value = currentPeriod;
             document.getElementById('courseSemester').value = currentSemester;
+            
+            // PERBAIKAN: Perbarui opsi semester berdasarkan periode
+            const courseSemesterSelect = document.getElementById('courseSemester');
+            courseSemesterSelect.innerHTML = '';
+            
+            if (currentPeriod === 'gasal') {
+                [1, 3, 5, 7].forEach(semester => {
+                    const option = document.createElement('option');
+                    option.value = semester;
+                    option.textContent = `Semester ${semester}`;
+                    if (semester == currentSemester) {
+                        option.selected = true;
+                    }
+                    courseSemesterSelect.appendChild(option);
+                });
+            } else {
+                [2, 4, 6, 8].forEach(semester => {
+                    const option = document.createElement('option');
+                    option.value = semester;
+                    option.textContent = `Semester ${semester}`;
+                    if (semester == currentSemester) {
+                        option.selected = true;
+                    }
+                    courseSemesterSelect.appendChild(option);
+                });
+            }
+            
             loadCourses();
         }
         
@@ -3305,6 +3450,33 @@
             document.getElementById('lecturerModal').style.display = 'flex';
             document.getElementById('lecturerPeriod').value = currentPeriod;
             document.getElementById('lecturerSemester').value = currentSemester;
+            
+            // PERBAIKAN: Perbarui opsi semester berdasarkan periode
+            const lecturerSemesterSelect = document.getElementById('lecturerSemester');
+            lecturerSemesterSelect.innerHTML = '';
+            
+            if (currentPeriod === 'gasal') {
+                [1, 3, 5, 7].forEach(semester => {
+                    const option = document.createElement('option');
+                    option.value = semester;
+                    option.textContent = `Semester ${semester}`;
+                    if (semester == currentSemester) {
+                        option.selected = true;
+                    }
+                    lecturerSemesterSelect.appendChild(option);
+                });
+            } else {
+                [2, 4, 6, 8].forEach(semester => {
+                    const option = document.createElement('option');
+                    option.value = semester;
+                    option.textContent = `Semester ${semester}`;
+                    if (semester == currentSemester) {
+                        option.selected = true;
+                    }
+                    lecturerSemesterSelect.appendChild(option);
+                });
+            }
+            
             loadLecturers();
         }
         
@@ -3809,6 +3981,12 @@
                                 const groupLabel = getOptionLabel('groups', schedule.group) || schedule.group || '-';
                                 const lecturerLabel = getLecturerName(schedule.lecturer) || schedule.lecturer || '-';
                                 
+                                // PERBAIKAN: Tampilkan mode online/offline untuk perkuliahan
+                                let onlineStatusHtml = '';
+                                if (schedule.type === 'lecture' && schedule.isOnline) {
+                                    onlineStatusHtml = `<div class="online-status ${schedule.isOnline}">${schedule.isOnline === 'online' ? 'Online' : 'Offline'}</div>`;
+                                }
+                                
                                 // Determine if class/group columns should be shown
                                 const isLecture = schedule.type === 'lecture';
                                 const isPracticum = schedule.type === 'practicum';
@@ -3823,6 +4001,7 @@
                                         <div class="activity ${typeClass}">
                                             ${activityText || typeLabel}
                                             ${activityText && typeLabel ? `<div class="activity-type">${typeLabel}</div>` : ''}
+                                            ${onlineStatusHtml}
                                         </div>
                                     </td>
                                     <td class="class-td">${isLecture || isPracticum ? classLabel : '<span class="no-class">-</span>'}</td>
